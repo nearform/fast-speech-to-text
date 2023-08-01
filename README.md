@@ -34,8 +34,8 @@ Open [localhost:5173](http://localhost:5173) in your browser.
 
 Each of these will be available in the web example (see above) - there is also a writeup for each linked below:
 
- - [OpenAI Whisper](https://openai.com/research/whisper)
-   - [Full Transcription](./notes/openai-full.md)
-   - [Chunked Audio](./notes/openai-chunked.md)
- - [Google Speech-to-text](https://cloud.google.com/speech-to-text) (not started)
- - [Assembly AI](https://www.assemblyai.com/) (not started)
+ - [x] [OpenAI Whisper](https://openai.com/research/whisper)
+   - [x] [Full Transcription](./notes/openai-full.md)
+   - [x] [Chunked Audio](./notes/openai-chunked.md)
+ - [ ] [Google Speech-to-text](https://cloud.google.com/speech-to-text) (not started)
+ - [ ] [Assembly AI](https://www.assemblyai.com/) (not started)
