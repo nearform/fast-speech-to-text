@@ -8,24 +8,12 @@ The basic idea being validated here is that streaming speech to text can allow u
 
 So far, all the experiments have been web-based, using Svelte for a (very) simple web UI, and fastify for a backend service.
 
-Use `pnpm` to install everything in the workspace (or use npm and raise a PR or ask @matt-clarson to):
-
 ```bash
-pnpm install
-```
+# install all dependencies for the 'web' and 'server' packages
+npm install
 
-Run the frontend in one shell:
-
-```bash
-cd web
-pnpm dev
-```
-
-Run the backend in a separate shell:
-
-```bash
-cd server
-pnpm nodemon | pnpm pino-pretty
+# run frontend and backend in dev
+npm run dev
 ```
 
 Open [localhost:5173](http://localhost:5173) in your browser.
