@@ -25,5 +25,6 @@ Each of these will be available in the web example (see above) - there is also a
  - [x] [OpenAI Whisper](https://openai.com/research/whisper)
    - [x] [Full Transcription](./notes/openai-full.md)
    - [x] [Chunked Audio](./notes/openai-chunked.md)
- - [ ] [Google Speech-to-text](https://cloud.google.com/speech-to-text) (not started)
+ - [x] [Google Speech-to-text](https://cloud.google.com/speech-to-text)
+   - [x] [Real Time Transcription](./notes/google-realtime.md)
  - [ ] [Assembly AI](https://www.assemblyai.com/) (not started)

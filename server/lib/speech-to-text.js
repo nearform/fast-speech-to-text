@@ -1,4 +1,6 @@
-import {Readable} from 'node:stream'
+import fs from "node:fs/promises"
+import { Readable } from "node:stream";
+import { SpeechClient } from "@google-cloud/speech";
 import { Configuration, OpenAIApi } from "openai";
 
 export class OpenAISpeechToText {
@@ -23,10 +25,10 @@ export class OpenAISpeechToText {
    */
   async transcribe(audio) {
     if (audio instanceof Readable) {
-      return this.#transcribeReadable(audio)
+      return this.#transcribeReadable(audio);
     } else {
       // ugh
-      return this.#transcribeReadable(Readable.from(audio))
+      return this.#transcribeReadable(Readable.from(audio));
     }
   }
 
@@ -41,5 +43,33 @@ export class OpenAISpeechToText {
     hack.path = "audio.webm";
     const result = await this.api.createTranscription(hack, "whisper-1");
     return result.data.text;
+  }
+}
+
+export class GoogleSpeechToText {
+  /**
+   * @constructor
+   * @param {SpeechClient} client
+   */
+  constructor(client) {
+    this.client = client;
+  }
+
+  static async create() {
+    const credentialsFile = process.env['GCLOUD_CREDENTIALS']
+    const credentials = await fs.readFile(credentialsFile, 'utf-8').then(s => JSON.parse(s))
+    const client = new SpeechClient({credentials});
+    return new GoogleSpeechToText(client);
+  }
+
+  createTranscription() {
+    return this.client.streamingRecognize({
+      config: {
+        encoding: "WEBM_OPUS",
+        sampleRateHertz: 16000,
+        languageCode: "en-US",
+      },
+      interimResults: true,
+    });
   }
 }
