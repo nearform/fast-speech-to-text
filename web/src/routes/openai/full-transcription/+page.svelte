@@ -13,6 +13,8 @@
 			.catch(console.error.bind(console, 'error connecting to api'));
 	});
 
+let transcriptonTimeDelta: number
+
 	async function startRecording() {
 		const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 		mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
@@ -38,7 +40,7 @@
 		};
 		mediaRecorder = mediaRecorder;
 	}
-	function stopRecording() {
+function stopRecording() {
 		mediaRecorder.stop();
 		mediaRecorder = mediaRecorder;
 	}
@@ -51,6 +53,7 @@
 
 	async function transcribeCurrentRecording() {
 		if (currentRecording == null) throw new Error('no data to send, please make a new recording');
+		const startTime = Date.now()
 		transcribing = true;
 		transcription = null;
 		transcription = await fetch(`${import.meta.env['VITE_API_HOST']}/transcribe/full`, {
@@ -60,6 +63,7 @@
 			.then((r) => r.json())
 			.then((d) => {
 				console.log('got transcription result', d);
+				transcriptonTimeDelta = Date.now() - startTime
 				return d.transcription;
 			})
 			.catch((err) => {
@@ -97,5 +101,6 @@
 		<p>GPT-ing it up...</p>
 	{:else if transcription != null}
 		<p>{transcription}</p>
+	<p>Transcription time: {transcriptonTimeDelta}ms</p>
 	{/if}
 {/if}

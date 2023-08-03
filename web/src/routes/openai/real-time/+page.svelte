@@ -116,10 +116,12 @@
 	let recorderInterval: number | null = null;
 	let recorder: MediaRecorder;
 	$: isRecording = recorderInterval != null;
+	let transcriptionStartTime: number | null = null;
 
 	async function startRecording() {
 		if (isRecording) return;
 		isRecording = true;
+		transcriptionStartTime = null;
 
 		const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 		recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
@@ -155,6 +157,7 @@
 
 	function stopRecording() {
 		if (!isRecording) return;
+		transcriptionStartTime = Date.now();
 
 		window.clearInterval(recorderInterval as number);
 
@@ -173,6 +176,11 @@
 			transcription += ' ' + $transcriptionData.transcription;
 		}
 	}
+
+	$: transcriptionTimeDelta =
+		$transcriptionData.transcription !== '' && transcriptionStartTime != null
+			? Date.now() - transcriptionStartTime
+			: null;
 </script>
 
 <h1>OpenAI Real-Time(ish)</h1>
@@ -200,5 +208,9 @@
 		<button on:click={startRecording}>Start</button>
 	{/if}
 </div>
+
+{#if transcriptionTimeDelta != null}
+	<p>Transcription time since recording stopped: {transcriptionTimeDelta}ms</p>
+{/if}
 
 <p>{transcription}</p>

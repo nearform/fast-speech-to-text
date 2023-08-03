@@ -112,16 +112,22 @@
 		};
 	});
 
-	let chunkDuration = 3;
+	let chunkDuration = 1600;
 	let recorder: MediaRecorder;
-	$: isRecording = recorder?.state === 'recording'
+	$: isRecording = recorder?.state === 'recording';
+
+	let transcriptionStartTime: number | null = null;
 
 	async function startRecording() {
 		if (isRecording) return;
+		transcriptionStartTime = null;
 
-		const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: {
-			sampleRate: 16000 // Hz
-		}, video: false });
+		const mediaStream = await navigator.mediaDevices.getUserMedia({
+			audio: {
+				sampleRate: 48000 // Hz
+			},
+			video: false
+		});
 		recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm; codecs=opus' });
 
 		recorder.ondataavailable = async (e) => {
@@ -144,12 +150,12 @@
 			console.error(e);
 		};
 
-		const timeslice = chunkDuration * 1000
-		recorder.start(timeslice)
+		recorder.start(chunkDuration);
 	}
 
 	function stopRecording() {
 		if (!isRecording) return;
+		transcriptionStartTime = Date.now();
 
 		recorder.stop();
 
@@ -158,8 +164,13 @@
 		});
 
 		// force svelte reactive update
-		recorder = recorder
+		recorder = recorder;
 	}
+
+	$: transcriptionTimeDelta =
+		transcriptionStartTime != null && $transcriptionData.transcription != ''
+			? Date.now() - transcriptionStartTime
+			: null;
 </script>
 
 <h1>Google Real-Time</h1>
@@ -173,11 +184,11 @@
 </p>
 
 <label
-	>Chunk Duration (seconds)
-	<input type="range" min="1" max="20" bind:value={chunkDuration} disabled={isRecording} />
+	>Chunk Duration (ms)
+	<input type="range" min="100" max="6000" step="100" bind:value={chunkDuration} disabled={isRecording} />
 </label>
 <br />
-<output>Chunk Duration: {chunkDuration} seconds</output>
+<output>Chunk Duration: {chunkDuration} ms</output>
 <pre><code>Open the dev console to see things working (or not working!)</code></pre>
 
 <div>
@@ -188,5 +199,8 @@
 	{/if}
 </div>
 
-<p>{$transcriptionData.transcription}</p>
+{#if transcriptionTimeDelta != null}
+	<p>Time since recording stopped: {transcriptionTimeDelta}ms</p>
+{/if}
 
+<p>{$transcriptionData.transcription}</p>

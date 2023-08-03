@@ -66,7 +66,7 @@ export class GoogleSpeechToText {
     return this.client.streamingRecognize({
       config: {
         encoding: "WEBM_OPUS",
-        sampleRateHertz: 16000,
+        sampleRateHertz: 48000,
         languageCode: "en-US",
       },
       interimResults: true,
