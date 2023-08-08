@@ -25,7 +25,9 @@ app.register(openAiFull, { speechToText: OpenAISpeechToText.create() });
 
 app.register(openAiChunked, { speechToText: OpenAISpeechToText.create() });
 
-app.register(googleRealtime, { speechToText: await GoogleSpeechToText.create() });
+app.register(googleRealtime, {
+  speechToText: await GoogleSpeechToText.create(),
+});
 
 try {
   await app.listen({ port: 1234 });
