@@ -2,23 +2,36 @@
 	import { onMount } from 'svelte';
 	import { derived, writable } from 'svelte/store';
 
+	import { languagesLookup } from '$lib';
+
+	function encodeString(str: string): Uint8Array {
+		const encoder = new TextEncoder();
+		const encoded = encoder.encode(str);
+		const buffer = new Uint8Array(encoded.byteLength + 1);
+
+		buffer[0] = 0;
+		buffer.set(encoded, 1);
+
+		return buffer;
+	}
+
+	type LanguageCode = keyof typeof languagesLookup;
 	type OutgoingMessage = string | ArrayBuffer;
 	type TextMessage = string;
-	type TranscriptionData = { type: 'transcription'; transcription: string };
+	type TranscribedText = { text: string; language: string };
+	type TranscriptionData = {
+		type: 'transcription';
+		transcription: { original: TranscribedText; translated?: TranscribedText };
+	};
+
+	const AVAILABLE_COUNTRIES = Object.entries<string>(languagesLookup);
 
 	// store vars
 	const outgoingMessage = writable<OutgoingMessage>('Initial message');
 	const binaryMessages = derived(outgoingMessage, ($msg) => {
 		if (typeof $msg === 'string') {
 			// if the message is a string, convert it to an array buffer
-			const encoder = new TextEncoder();
-			const encoded = encoder.encode($msg);
-			const buf = new Uint8Array(encoded.byteLength + 1);
-			// set first byte to 0 to indicate a string
-			buf[0] = 0;
-			// copy encoded string into buf
-			buf.set(encoded, 1);
-			return buf;
+			return encodeString($msg);
 		} else {
 			// message is already an array buffer
 			return $msg;
@@ -43,25 +56,29 @@
 				set($obj);
 			}
 		},
-		{ type: 'transcription', transcription: '' }
+		{ type: 'transcription', transcription: { original: { text: '', language: 'en' } } }
 	);
 
 	// state vars
 	let chunkDuration = 1500;
 	let debouncer: NodeJS.Timeout;
+	let inputLang: LanguageCode = 'en';
+	let outputLang: LanguageCode = inputLang;
 	let recorder: MediaRecorder;
-	let transcriptionStartTime: number | null = null;
 
 	// effects/reactive vars
 	$: isRecording = recorder?.state === 'recording';
 	$: lastSpokenWords = <string[]>[];
-	$: transcribedText = $transcriptionData.transcription.toLowerCase().split(' ').filter(Boolean);
+	$: transcribedText = $transcriptionData.transcription.original.text
+		.toLowerCase()
+		.split(' ')
+		.filter(Boolean);
+	$: translatedText = ($transcriptionData.transcription.translated?.text || '')
+		.toLowerCase()
+		.split(' ')
+		.filter(Boolean);
 	// say the most recent words as they're received
-	$: transcribedText && debouncedReadBack();
-	$: transcriptionTimeDelta =
-		transcriptionStartTime != null && $transcriptionData.transcription != ''
-			? Date.now() - transcriptionStartTime
-			: null;
+	$: (translatedText.length || transcribedText.length) && debouncedReadBack();
 
 	// helper fns
 	function debouncedReadBack() {
@@ -97,17 +114,22 @@
 		return o != null && typeof o === 'object' && 'type' in o && o.type === 'transcription';
 	}
 	function readBack() {
-		const sentence = findWordsToSay(lastSpokenWords, transcribedText);
+		// if we have translated text, read it out.  if not, just read
+		// whatever was transcribed
+		const sentence = findWordsToSay(
+			lastSpokenWords,
+			translatedText.length ? translatedText : transcribedText
+		);
 
 		// if supported by the browser, say it back
 		if (sentence.length && window.speechSynthesis) {
 			const utterance = new SpeechSynthesisUtterance(sentence.join(' '));
+			utterance.lang = outputLang;
 			speechSynthesis.speak(utterance);
 		}
 	}
 	async function startRecording() {
 		if (isRecording) return;
-		transcriptionStartTime = null;
 
 		const mediaStream = await navigator.mediaDevices.getUserMedia({
 			audio: {
@@ -118,15 +140,28 @@
 		recorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm; codecs=opus' });
 
 		recorder.ondataavailable = async (e) => {
-			const buf = new Uint8Array(e.data.size + 1);
+			const buffer = new Uint8Array(e.data.size + 22);
 			if (isRecording) {
-				buf[0] = 1;
+				buffer[0] = 1;
 			} else {
-				buf[0] = 2;
+				buffer[0] = 2;
 			}
 
-			buf.set(await e.data.arrayBuffer().then((b) => new Uint8Array(b)), 1);
-			outgoingMessage.set(buf.buffer);
+			// add the languages used, padding to a fixed length so that
+			// we can reliably receive & parse them on the back end
+			// N.B - if this padding changes or is removed, the back end
+			//       will need updating to match
+			const fromLanguage = inputLang.padEnd(10, '*');
+			const toLanguage = outputLang.padEnd(10, '*');
+
+			const encoder = new TextEncoder();
+			const langsEncoded = encoder.encode(`${fromLanguage}:${toLanguage}`);
+			const langBuffer = new Uint8Array(langsEncoded.byteLength);
+			langBuffer.set(langsEncoded);
+			buffer.set(langBuffer, 1);
+
+			buffer.set(await e.data.arrayBuffer().then((b) => new Uint8Array(b)), 1 + langBuffer.length);
+			outgoingMessage.set(buffer.buffer);
 		};
 
 		recorder.onerror = (e) => {
@@ -137,7 +172,6 @@
 	}
 	function stopRecording() {
 		if (!isRecording) return;
-		transcriptionStartTime = Date.now();
 
 		recorder.stop();
 
@@ -214,8 +248,8 @@
 		provide a real-time speech-to-text experience.
 	</p>
 	<p>
-		Click 'Start' and start speaking - a live transcription will be rendered as it comes in below,
-		and click 'Stop' to stop recording.
+		Click the button below and start speaking - a live transcription will be rendered as it comes in
+		below, and click again to stop recording.
 	</p>
 	<p>Use the range slider below to play around with the chunk length</p>
 
@@ -229,26 +263,60 @@
 			bind:value={chunkDuration}
 			disabled={isRecording}
 		/>
+		{chunkDuration} ms
 	</label>
-	<br />
-	<output>Chunk Duration: {chunkDuration} ms</output>
 
-	<div>
-		{#if isRecording}
-			<button on:click={stopRecording}>Stop</button>
-		{:else}
-			<button on:click={startRecording}>Start</button>
-		{/if}
-	</div>
+	<p>
+		I am speaking in
+		<select
+			bind:value={inputLang}
+			on:change={() => {
+				transcribedText = [];
+				translatedText = [];
+			}}
+		>
+			{#each AVAILABLE_COUNTRIES as [langCode, name]}
+				<option value={langCode}>{name}</option>
+			{/each}
+		</select>
+		, and would like to hear the response in
+		<select
+			bind:value={outputLang}
+			on:change={() => {
+				transcribedText = [];
+				translatedText = [];
+			}}
+		>
+			{#each AVAILABLE_COUNTRIES as [langCode, name]}
+				<option value={langCode}>{name}</option>
+			{/each}
+		</select>
+	</p>
 
-	{#if transcriptionTimeDelta != null}
-		<p>Time since recording stopped: {transcriptionTimeDelta}ms</p>
-	{/if}
+	<button
+		class="recording-toggle"
+		class:start={!isRecording}
+		class:stop={isRecording}
+		on:click={isRecording ? stopRecording : startRecording}
+		title={`${isRecording ? 'Stop' : 'Start'} recording`}
+	>
+		<div class="icon" />
+	</button>
+
 	<div class="output">
 		{#if transcribedText.length}
 			<p class="heard-text">
-				Heard <span class="transcription">"{transcribedText.join(' ')}"</span>
+				Heard (in {languagesLookup[inputLang]}):<br /><span class="transcription"
+					>"{transcribedText.join(' ')}"</span
+				>
 			</p>
+			{#if translatedText.length}
+				<p class="translated-text">
+					Translated (to {languagesLookup[outputLang]}):<br /><span class="transcription"
+						>{translatedText.join(' ')}</span
+					>
+				</p>
+			{/if}
 		{/if}
 		{#if !transcribedText.length}
 			<p>
@@ -278,12 +346,45 @@
 		border-radius: 3px;
 		padding: 1.5em 3em;
 		margin-top: 2em;
-		width: 80%;
+		width: clamp(200px, 80%, 800px);
 	}
 	.heard-text {
 		font-weight: bold;
 	}
 	.transcription {
 		font-style: italic;
+	}
+
+	.recording-toggle {
+		height: 40px;
+		width: 40px;
+		border-radius: 50%;
+		outline: none;
+		border: 1px solid;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-top: 20px;
+		cursor: pointer;
+	}
+
+	.recording-toggle .icon {
+		height: 20px;
+		width: 20px;
+	}
+
+	.recording-toggle.start {
+		background-color: rgb(240, 240, 240);
+		border-color: rgb(128, 128, 128);
+	}
+
+	.recording-toggle.start .icon {
+		background-color: red;
+		border-radius: 50%;
+	}
+	.recording-toggle.stop .icon {
+		background-color: rgb(64, 64, 64);
+		height: 15px;
+		width: 15px;
 	}
 </style>
