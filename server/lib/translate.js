@@ -37,10 +37,6 @@ export class GoogleTranslate {
       );
     }
 
-    if (targetLang.length !== 2) {
-      throw new Error("Invalid language code provided");
-    }
-
     return await this.client.translate(text, { to: targetLang });
   }
 }
