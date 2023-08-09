@@ -1,10 +1,10 @@
 import stream from "node:stream/promises";
-import { GoogleSpeechToText } from "./speech-to-text.js";
 
+import { GoogleSpeechToText } from "./speech-to-text.js";
+import { GoogleTranslate } from "./translate.js";
 /**
  * @param {import('fastify').FastifyInstance} instance
  * @param {object} opts
- * @param {GoogleSpeechToText} opts.speechToText
  * @param {Function} done
  */
 function googleRealtime(instance, opts, done) {
@@ -14,8 +14,14 @@ function googleRealtime(instance, opts, done) {
   ) {
     throw new Error("speechToText must be provided");
   }
-
   instance.decorate("speechToText", opts.speechToText);
+
+  if (!opts.translator || !(opts.translator instanceof GoogleTranslate)) {
+    throw new Error("translator must be provided");
+  }
+
+  instance.decorate("translator", opts.translator);
+
   instance.get("/google/real-time", { websocket: true }, (connection) => {
     connection.socket.on("connect", () => {
       instance.log.info("Connection opened with a remote client");
@@ -40,25 +46,34 @@ function googleRealtime(instance, opts, done) {
 
     /**
      * @param {Buffer} buffer
-     * @returns {[number, Buffer]}
+     * @returns {[number, string[], Buffer]}
      */
-    function head(buffer) {
-      const head = buffer[0] ?? -1;
-      const tail = buffer.subarray(1);
-      return [head, tail];
+    function deconstructMessage(buffer) {
+      const langDecoder = new TextDecoder();
+
+      const stateCode = buffer[0] ?? -1;
+
+      const langs = langDecoder
+        .decode(buffer.subarray(1, 21))
+        .replace(/\*/g, "")
+        .split(":");
+
+      const audioContent = buffer.subarray(22);
+
+      return [stateCode, langs, audioContent];
     }
 
     // populated when a new audio file starts to arrive
     /** @type {import('node:stream').Duplex | null} */
     let transcription = null;
     connection.socket.on("message", (rawData) => {
-      const [k, data] = head(rawData);
-      switch (k) {
+      const [stateCode, langs, recording] = deconstructMessage(rawData);
+      switch (stateCode) {
         case 0:
           {
             instance.log.info(
-              { text: data.toString("utf-8") },
-              "Got text message from client",
+              { text: recording.toString("utf-8") },
+              "Got text message from client"
             );
             sendJson({ type: "msg", msg: "hey good-lookin" });
           }
@@ -66,36 +81,75 @@ function googleRealtime(instance, opts, done) {
         case 1:
           {
             instance.log.info(
-              { length: data.length },
-              "Got continuous binary message from client",
+              { length: recording.length },
+              "Got continuous binary message from client"
             );
             if (transcription == null) {
               transcription = instance.speechToText.createTranscription();
-              transcription.on("data", (data) => {
+              transcription.on("data", async (data) => {
+                const transcript = data.results[0].alternatives[0].transcript;
+
+                const [translateFrom, translateTo] = langs;
+
+                let translated;
+                // if the to & from languages are the same, there's no point
+                // in translating them so just return the transcription
+                if (translateFrom !== translateTo) {
+                  instance.log.info(
+                    "Translating transcription into " + translateTo
+                  );
+                  try {
+                    [translated] = await instance.translator.translate(
+                      transcript,
+                      translateTo
+                    );
+                  } catch (error) {
+                    instance.log.error(
+                      error.message,
+                      "Failed to generate translation"
+                    );
+                    translated = "ERROR";
+                  }
+                }
+
+                const payload = {
+                  original: {
+                    text: transcript,
+                    language: translateFrom,
+                  },
+                };
+
+                if (translated) {
+                  payload.translated = {
+                    text: translated,
+                    language: translateTo,
+                  };
+                }
+
                 sendJson({
                   type: "transcription",
-                  transcription: data.results[0].alternatives[0].transcript,
+                  transcription: payload,
                 });
               });
               transcription.on("error", (err) => {
                 instance.log.error(
                   { err },
-                  "Error from real-time transcription stream",
+                  "Error from real-time transcription stream"
                 );
               });
             }
 
             if (!transcription.closed && !transcription.destroyed) {
-              transcription.write(data, null, (err) => {
-                if (err == null) return
+              transcription.write(recording, null, (err) => {
+                if (err == null) return;
                 instance.log.error(
                   { err },
-                  "Error writing audio chunk to transcription stream",
+                  "Error writing audio chunk to transcription stream"
                 );
               });
             } else {
               instance.log.warn(
-                "Received audio chunk while transcription stream is unavailable - dropping this data",
+                "Received audio chunk while transcription stream is unavailable - dropping this data"
               );
             }
           }
@@ -103,28 +157,28 @@ function googleRealtime(instance, opts, done) {
         case 2:
           {
             instance.log.info(
-              { length: data.length },
-              "Got sequence-ending binary message from client",
+              { length: recording.length },
+              "Got sequence-ending binary message from client"
             );
             if (transcription == null) {
               instance.log.warn(
-                "Received final audio chunk before transcription stream was establishsed, dropping this data",
+                "Received final audio chunk before transcription stream was establishsed, dropping this data"
               );
             }
             if (transcription.closed || transcription.destroyed) {
               instance.log.warn(
-                "Received audio chunk while transcription stream is unavailable - dropping this data",
+                "Received audio chunk while transcription stream is unavailable - dropping this data"
               );
             }
 
             instance.log.info(
-              "Writing final audio chunk to transcription stream",
+              "Writing final audio chunk to transcription stream"
             );
-            transcription.end(data, null, (err) => {
-              if (err == null) return
+            transcription.end(recording, null, (err) => {
+              if (err == null) return;
               instance.log.error(
                 { err },
-                "Error writing audio chunk to transcription stream",
+                "Error writing audio chunk to transcription stream"
               );
             });
 
@@ -137,7 +191,7 @@ function googleRealtime(instance, opts, done) {
         default:
           instance.log.warn(
             { raw: rawData.toString("utf-8") },
-            "Got unknown message from client",
+            "Got unknown message from client"
           );
       }
     });
@@ -149,7 +203,7 @@ function googleRealtime(instance, opts, done) {
         !transcription.destroyed
       ) {
         instance.log.info(
-          "Connection closing prior to transcription stream completing",
+          "Connection closing prior to transcription stream completing"
         );
         transcription.destroy();
         transcription = null;
