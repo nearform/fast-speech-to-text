@@ -22,7 +22,7 @@ function googleRealtime(instance, opts, done) {
 
   instance.decorate("translator", opts.translator);
 
-  instance.get("/google/real-time", { websocket: true }, (connection) => {
+  instance.get("/transcribe", { websocket: true }, (connection) => {
     connection.socket.on("connect", () => {
       instance.log.info("Connection opened with a remote client");
     });
@@ -68,6 +68,7 @@ function googleRealtime(instance, opts, done) {
     let transcription = null;
     connection.socket.on("message", (rawData) => {
       const [stateCode, langs, recording] = deconstructMessage(rawData);
+      console.log("stateCode:", stateCode);
       switch (stateCode) {
         case 0:
           {
@@ -165,7 +166,7 @@ function googleRealtime(instance, opts, done) {
                 "Received final audio chunk before transcription stream was establishsed, dropping this data"
               );
             }
-            if (transcription.closed || transcription.destroyed) {
+            if (transcription?.closed || transcription?.destroyed) {
               instance.log.warn(
                 "Received audio chunk while transcription stream is unavailable - dropping this data"
               );
@@ -174,7 +175,7 @@ function googleRealtime(instance, opts, done) {
             instance.log.info(
               "Writing final audio chunk to transcription stream"
             );
-            transcription.end(recording, null, (err) => {
+            transcription?.end(recording, null, (err) => {
               if (err == null) return;
               instance.log.error(
                 { err },
