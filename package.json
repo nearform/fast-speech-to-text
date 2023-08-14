@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev:web": "npm run dev -w=web",
     "dev:server": "npm run dev -w=server",

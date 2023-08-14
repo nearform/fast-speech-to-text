@@ -1,0 +1,23 @@
+.output {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.125);
+  border-radius: 3px;
+  padding: 1.5em 3em;
+  margin-top: 2em;
+  width: clamp(200px, 80%, 800px);
+}
+
+.output .section-title {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.output .section-text {
+  font-weight: normal;
+  font-style: italic;
+}
+.output .section-text::before,
+.output .section-text::after {
+  content: '"';
+}
