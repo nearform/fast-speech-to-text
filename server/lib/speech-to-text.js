@@ -1,4 +1,4 @@
-import fs from "node:fs/promises"
+import fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import { SpeechClient } from "@google-cloud/speech";
 import { Configuration, OpenAIApi } from "openai";
@@ -56,18 +56,20 @@ export class GoogleSpeechToText {
   }
 
   static async create() {
-    const credentialsFile = process.env['GCLOUD_CREDENTIALS']
-    const credentials = await fs.readFile(credentialsFile, 'utf-8').then(s => JSON.parse(s))
-    const client = new SpeechClient({credentials});
+    const credentialsFile = process.env["GCLOUD_CREDENTIALS"];
+    const credentials = await fs
+      .readFile(credentialsFile, "utf-8")
+      .then((s) => JSON.parse(s));
+    const client = new SpeechClient({ credentials });
     return new GoogleSpeechToText(client);
   }
 
-  createTranscription() {
+  createTranscription(languageCode) {
     return this.client.streamingRecognize({
       config: {
         encoding: "WEBM_OPUS",
         sampleRateHertz: 48000,
-        languageCode: "en-US",
+        languageCode,
       },
       interimResults: true,
     });

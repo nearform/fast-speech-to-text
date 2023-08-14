@@ -68,6 +68,8 @@ function googleRealtime(instance, opts, done) {
     let transcription = null;
     connection.socket.on("message", (rawData) => {
       const [stateCode, langs, recording] = deconstructMessage(rawData);
+
+      const [translateFrom, translateTo] = langs;
       console.log("stateCode:", stateCode);
       switch (stateCode) {
         case 0:
@@ -86,11 +88,10 @@ function googleRealtime(instance, opts, done) {
               "Got continuous binary message from client"
             );
             if (transcription == null) {
-              transcription = instance.speechToText.createTranscription();
+              transcription =
+                instance.speechToText.createTranscription(translateFrom);
               transcription.on("data", async (data) => {
                 const transcript = data.results[0].alternatives[0].transcript;
-
-                const [translateFrom, translateTo] = langs;
 
                 let translated;
                 // if the to & from languages are the same, there's no point
@@ -161,12 +162,13 @@ function googleRealtime(instance, opts, done) {
               { length: recording.length },
               "Got sequence-ending binary message from client"
             );
-            if (transcription == null) {
+            if (!transcription) {
               instance.log.warn(
                 "Received final audio chunk before transcription stream was establishsed, dropping this data"
               );
+              break;
             }
-            if (transcription?.closed || transcription?.destroyed) {
+            if (transcription.closed || transcription.destroyed) {
               instance.log.warn(
                 "Received audio chunk while transcription stream is unavailable - dropping this data"
               );
@@ -175,7 +177,7 @@ function googleRealtime(instance, opts, done) {
             instance.log.info(
               "Writing final audio chunk to transcription stream"
             );
-            transcription?.end(recording, null, (err) => {
+            transcription.end(recording, null, (err) => {
               if (err == null) return;
               instance.log.error(
                 { err },
