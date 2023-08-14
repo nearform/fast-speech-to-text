@@ -1,179 +1,151 @@
-import { FC, useEffect, useState } from "react";
-import clsx from "clsx";
+import { FC, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 
-import { useAsync, useMount } from "react-use";
-import { AsyncState } from "react-use/lib/useAsyncFn";
+import { LanguageCode } from '@/lib/types/language';
+import { OutgoingMessage } from '@/lib/types/message';
+import { TranscriptionData } from '@/lib/types/transcription';
 
-import { LanguageCode } from "@/lib/types/language";
-import { OutgoingMessage } from "@/lib/types/message";
-import { RecorderState, TranscriptionData } from "@/lib/types/transcription";
+import { stringToBuffer } from '@/lib/utils';
 
-import { stringToBuffer } from "@/lib/utils";
-
-import "./styles.css";
+import './styles.css';
 
 type RecordProps = {
-  chunkDuration: number;
-  isRecording: boolean;
-  langFrom: LanguageCode;
-  langTo: LanguageCode;
-  onRecordingStateChange: (state: RecorderState) => void;
-  onTranscriptionChange: (transcription: TranscriptionData) => void;
+	chunkDuration: number;
+	langFrom: LanguageCode;
+	langTo: LanguageCode;
+	onTranscriptionChange: (transcription: TranscriptionData) => void;
 };
 
-const WS_URL = new URL(import.meta.env["VITE_API_HOST"]);
-WS_URL.protocol = "ws";
-WS_URL.pathname = "/transcribe";
-let wsInstance: WebSocket;
+const WS_URL = new URL(import.meta.env['VITE_API_HOST']);
+WS_URL.protocol = 'ws';
+WS_URL.pathname = '/transcribe';
+// let webSocket.current: WebSocket;
 
 export const RecordingToggle: FC<RecordProps> = ({
-  chunkDuration,
-  isRecording,
-  langFrom,
-  langTo,
-  onRecordingStateChange,
-  onTranscriptionChange,
+	chunkDuration,
+	langFrom,
+	langTo,
+	onTranscriptionChange
 }) => {
-  const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>(
-    []
-  );
-  const [outgoingMessage, setOutgoingMessage] = useState<OutgoingMessage>();
+	const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>([]);
+	const [outgoingMessage, setOutgoingMessage] = useState<OutgoingMessage>();
+	const [isRecording, setIsRecording] = useState<boolean>(false);
 
-  const recorder: AsyncState<MediaRecorder> = useAsync(async () => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: { sampleRate: 48000 },
-      video: false,
-    });
+	const recorder = useRef<MediaRecorder>();
+	const webSocket = useRef<WebSocket>();
 
-    const rec = new MediaRecorder(mediaStream);
+	useEffect(() => {
+		webSocket.current = new WebSocket(WS_URL);
+		webSocket.current.binaryType = 'arraybuffer';
 
-    rec.ondataavailable = async (event: BlobEvent) => {
-      const outgoingMessage = new Uint8Array(event.data.size + 22);
+		webSocket.current?.addEventListener('open', () => {
+			console.log('WebSocket connection open');
+			if (bufferedMessages.length) {
+				console.log(`${bufferedMessages.length} messages buffered, sending now`);
+				for (const message of bufferedMessages) {
+					webSocket.current?.send(message);
+				}
+			}
+		});
+		webSocket.current.addEventListener('error', (event: Event) => {
+			console.error('Error emitted from WebSocket', event);
+		});
+		webSocket.current.addEventListener('close', () => {
+			console.info('WebSocket connection closed');
+		});
+		webSocket.current.addEventListener('message', (event: MessageEvent) => {
+			const decoder = new TextDecoder();
+			const message = JSON.parse(decoder.decode(event.data as ArrayBuffer));
+			console.log(message);
+			onTranscriptionChange(message);
+		});
 
-      const stateFlag = rec.state === "recording" ? 1 : 2;
-      outgoingMessage[0] = stateFlag;
+		return () => webSocket.current?.close();
+	}, []);
 
-      // add the languages used, padding to a fixed length so that
-      // we can reliably receive & parse them on the back end
-      // N.B - if this padding changes or is removed, the back end
-      //       will need updating to match
-      const langsBuffer = stringToBuffer(
-        `${langFrom.padEnd(10, "*")}:${langTo.padEnd(10, "*")}`
-      );
+	// send message(s) to webSocket
+	useEffect(() => {
+		if (!outgoingMessage) {
+			// no message to send, just bail out
+			return;
+		}
+		if (!webSocket.current?.readyState) {
+			throw new Error("Can't send message - WebSocket instance not initialised");
+		}
 
-      outgoingMessage.set(langsBuffer, 1);
+		// convert to ArrayBuffer prior to sending
+		const binaryMsg: ArrayBuffer =
+			typeof outgoingMessage === 'string' ? stringToBuffer(outgoingMessage) : outgoingMessage;
 
-      const recordingBuffer = await event.data.arrayBuffer();
-      outgoingMessage.set(
-        new Uint8Array(recordingBuffer),
-        1 + langsBuffer.length
-      );
-      setOutgoingMessage(outgoingMessage);
-    };
+		switch (webSocket.current?.readyState) {
+			case WebSocket.CONNECTING:
+				// webSocket.current not connected yet, buffer the message
+				if (!bufferedMessages.includes(binaryMsg)) {
+					setBufferedMessages((prev) => [...prev, binaryMsg]);
+				}
+				break;
+			case WebSocket.OPEN:
+				// send the message
+				webSocket.current.send(binaryMsg);
+				break;
+			default:
+				console.warn(
+					'Attempting to send message while WebSocket instance not in a ready state, message will not be sent.'
+				);
+				break;
+		}
+	}, [outgoingMessage]);
 
-    rec.onerror = (event: Event) => {
-      console.error("Error occured with recording", event);
-    };
+	const toggleRecording = async () => {
+		const isRecording = recorder.current?.state === 'recording';
 
-    return rec;
-  }, [langFrom, langTo]);
+		if ((recorder.current && !isRecording) || !recorder.current) {
+			const mediaStream = await navigator.mediaDevices.getUserMedia({
+				audio: { sampleRate: 48000 },
+				video: false
+			});
+			recorder.current = new MediaRecorder(mediaStream, {
+				mimeType: 'audio/webm; codecs=opus'
+			});
+			recorder.current.ondataavailable = async (event: BlobEvent) => {
+				const outgoingMessage = new Uint8Array(event.data.size + 22);
 
-  useMount(() => {
-    console.log("Recorder >> onMount");
-    wsInstance = new WebSocket(WS_URL);
-    wsInstance.binaryType = "arraybuffer";
+				const stateFlag = recorder.current?.state === 'recording' ? 1 : 2;
+				outgoingMessage[0] = stateFlag;
 
-    wsInstance.addEventListener("open", () => {
-      console.log("WebSocket connection open");
-      if (bufferedMessages.length) {
-        console.log(
-          `${bufferedMessages.length} messages buffered, sending now`
-        );
-        for (const message of bufferedMessages) {
-          wsInstance.send(message);
-        }
-      }
-    });
-    wsInstance.addEventListener("error", (event: Event) => {
-      console.error("Error emitted from WebSocket", event);
-    });
-    wsInstance.addEventListener("close", () => {
-      console.info("WebSocket connection closed");
-    });
-    wsInstance.addEventListener("message", (event: MessageEvent) => {
-      const decoder = new TextDecoder();
-      const message = JSON.parse(decoder.decode(event.data as ArrayBuffer));
-      console.log(message);
-      onTranscriptionChange(message);
-    });
-  });
+				// add the languages used, padding to a fixed length so that
+				// we can reliably receive & parse them on the back end
+				// N.B - if this padding changes or is removed, the back end
+				//       will need updating to match
+				const langsBuffer = stringToBuffer(`${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`);
 
-  useEffect(() => {
-    console.log("Recorder state changed", recorder.value?.state || "loading");
+				outgoingMessage.set(langsBuffer, 1);
 
-    onRecordingStateChange(recorder.value?.state || "loading");
-  }, [recorder.value?.state]);
+				const recordingBuffer = await event.data.arrayBuffer();
+				outgoingMessage.set(new Uint8Array(recordingBuffer), 1 + langsBuffer.length);
+				setOutgoingMessage(outgoingMessage.buffer);
+			};
 
-  // send message(s) to webSocket
-  useEffect(() => {
-    if (!outgoingMessage) {
-      // no message to send, just bail out
-      return;
-    }
-    if (!wsInstance?.readyState) {
-      throw new Error(
-        "Can't send message - WebSocket instance not initialised"
-      );
-    }
+			recorder.current.onerror = (event: Event) => {
+				console.error('Error occured with recording', event);
+			};
 
-    // convert to ArrayBuffer prior to sending
-    const binaryMsg: ArrayBuffer =
-      typeof outgoingMessage === "string"
-        ? stringToBuffer(outgoingMessage)
-        : outgoingMessage;
+			recorder.current.start(chunkDuration);
+			setIsRecording(true);
+		} else if (recorder.current && isRecording) {
+			setIsRecording(false);
+			recorder.current.stop();
+			recorder.current.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
-    switch (wsInstance?.readyState) {
-      case WebSocket.CONNECTING:
-        // wsInstance not connected yet, buffer the message
-        if (!bufferedMessages.includes(binaryMsg)) {
-          setBufferedMessages((prev) => [...prev, binaryMsg]);
-        }
-        break;
-      case WebSocket.OPEN:
-        // send the message
-        wsInstance.send(binaryMsg);
-        break;
-      default:
-        console.warn(
-          "Attempting to send message while WebSocket instance not in a ready state, message will not be sent."
-        );
-        break;
-    }
-  }, [outgoingMessage]);
+			// clear the state to force re-instantiation if/when user attempts
+			// to record again
+			recorder.current = undefined;
+		}
+	};
 
-  const toggleRecording = () => {
-    if (recorder.loading || !recorder.value) {
-      throw new Error(
-        "Can't toggle recording, MediaRecorder instance not initialised"
-      );
-    }
-    if (isRecording) {
-      recorder.value.stop();
-      recorder.value.stream
-        .getTracks()
-        .forEach((track: MediaStreamTrack) => track.stop());
-    } else {
-      recorder.value?.start(chunkDuration);
-    }
-  };
-
-  return (
-    <button
-      className={clsx("recording-toggle", { active: isRecording })}
-      disabled={recorder.loading}
-      onClick={toggleRecording}
-    >
-      <div className="icon" />
-    </button>
-  );
+	return (
+		<button className={clsx('recording-toggle', { active: isRecording })} onClick={toggleRecording}>
+			<div className="icon" />
+		</button>
+	);
 };
