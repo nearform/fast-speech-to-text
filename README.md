@@ -6,18 +6,6 @@ The basic idea being validated here is that streaming speech to text can allow u
 
 ## Running things
 
-So far, all the experiments have been web-based, using Svelte for a (very) simple web UI, and fastify for a backend service.
-
-```bash
-# install all dependencies for the 'web' and 'server' packages
-npm install
-
-# run frontend and backend in dev
-npm run dev
-```
-
-Open [localhost:5173](http://localhost:5173) in your browser.
-
 ### Environment Variables
 
 You will need the following environment variables set - use `.env` files in the `web/` and `server/` directories to set them:
@@ -38,15 +26,15 @@ OPENAI_API_KEY=
 GCLOUD_CREDENTIALS=
 ```
 
-## Experiments
+### Launching the application
 
-Each of these will be available in the web example (see above) - there is also a writeup for each linked below:
+```bash
+# install all dependencies for the 'web' and 'server' packages
+npm install
 
- - [x] [OpenAI Whisper](https://openai.com/research/whisper)
-   - [x] [Full Transcription](./notes/openai-full.md)
-   - [x] [Chunked Audio](./notes/openai-chunked.md)
- - [x] [Google Speech-to-text](https://cloud.google.com/speech-to-text)
-   - [x] [Real Time Transcription](./notes/google-realtime.md)
- - [ ] [Assembly AI](https://www.assemblyai.com/) (not started)
+# run frontend and backend in dev
+npm run dev
+# or `npm run dev:web` & `npm run dev:server` in separate terminals if you so wish
+```
 
-Some [rough timings](./notes/timings.md) to compare the approaches are available here
+Open [localhost:5173](http://localhost:5173) in your browser.

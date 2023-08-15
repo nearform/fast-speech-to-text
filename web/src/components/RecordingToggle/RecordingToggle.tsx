@@ -1,6 +1,10 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+
+import _set from 'lodash.set';
+
 import { LanguageCode } from '@/lib/types/language';
 import { OutgoingMessage } from '@/lib/types/message';
 import { TranscriptionData } from '@/lib/types/transcription';
@@ -19,7 +23,6 @@ type RecordProps = {
 const WS_URL = new URL(import.meta.env['VITE_API_HOST']);
 WS_URL.protocol = 'ws';
 WS_URL.pathname = '/transcribe';
-// let webSocket.current: WebSocket;
 
 export const RecordingToggle: FC<RecordProps> = ({
 	chunkDuration,
@@ -32,36 +35,46 @@ export const RecordingToggle: FC<RecordProps> = ({
 	const [isRecording, setIsRecording] = useState<boolean>(false);
 
 	const recorder = useRef<MediaRecorder>();
-	const webSocket = useRef<WebSocket>();
 
-	useEffect(() => {
-		webSocket.current = new WebSocket(WS_URL);
-		webSocket.current.binaryType = 'arraybuffer';
-
-		webSocket.current?.addEventListener('open', () => {
+	const { readyState, sendMessage, getWebSocket } = useWebSocket(WS_URL.toString(), {
+		onOpen: () => {
 			console.log('WebSocket connection open');
 			if (bufferedMessages.length) {
 				console.log(`${bufferedMessages.length} messages buffered, sending now`);
 				for (const message of bufferedMessages) {
-					webSocket.current?.send(message);
+					sendMessage(message);
 				}
 			}
-		});
-		webSocket.current.addEventListener('error', (event: Event) => {
+		},
+		onError: (event: Event) => {
 			console.error('Error emitted from WebSocket', event);
-		});
-		webSocket.current.addEventListener('close', () => {
-			console.info('WebSocket connection closed');
-		});
-		webSocket.current.addEventListener('message', (event: MessageEvent) => {
+		},
+		onClose: () => {
+			console.log('WebSocket connection closed');
+		},
+		onMessage: (event: MessageEvent) => {
 			const decoder = new TextDecoder();
 			const message = JSON.parse(decoder.decode(event.data as ArrayBuffer));
 			console.log(message);
 			onTranscriptionChange(message);
-		});
+		},
+		shouldReconnect: () => true,
+		reconnectAttempts: 5,
+		reconnectInterval: (attemptNo: number) => 200 * attemptNo,
+		onReconnectStop: (attempts) =>
+			console.warn(`Giving up re-establishing connection after ${attempts} attempts`)
+	});
 
-		return () => webSocket.current?.close();
+	useEffect(() => {
+		return () => {
+			getWebSocket()?.close();
+		};
 	}, []);
+	useEffect(() => {
+		if (getWebSocket()) {
+			_set(getWebSocket(), 'binaryType', 'arraybuffer');
+		}
+	}, [getWebSocket()]);
 
 	// send message(s) to webSocket
 	useEffect(() => {
@@ -69,32 +82,23 @@ export const RecordingToggle: FC<RecordProps> = ({
 			// no message to send, just bail out
 			return;
 		}
-		if (!webSocket.current?.readyState) {
-			throw new Error("Can't send message - WebSocket instance not initialised");
-		}
 
 		// convert to ArrayBuffer prior to sending
 		const binaryMsg: ArrayBuffer =
 			typeof outgoingMessage === 'string' ? stringToBuffer(outgoingMessage) : outgoingMessage;
 
-		switch (webSocket.current?.readyState) {
-			case WebSocket.CONNECTING:
-				// webSocket.current not connected yet, buffer the message
-				if (!bufferedMessages.includes(binaryMsg)) {
-					setBufferedMessages((prev) => [...prev, binaryMsg]);
-				}
-				break;
-			case WebSocket.OPEN:
-				// send the message
-				webSocket.current.send(binaryMsg);
-				break;
-			default:
-				console.warn(
-					'Attempting to send message while WebSocket instance not in a ready state, message will not be sent.'
-				);
-				break;
+		if (readyState === ReadyState.CONNECTING) {
+			if (!bufferedMessages.includes(binaryMsg)) {
+				console.debug('WebSocket not yet connected, adding message to buffer to send later');
+				setBufferedMessages((prev) => [...prev, binaryMsg]);
+			}
+		} else if (readyState === ReadyState.OPEN) {
+			console.debug('WebSocket connection active, sending message');
+			sendMessage(binaryMsg);
+		} else {
+			console.warn('WebSocket not in a ready state, message will not be sent.');
 		}
-	}, [outgoingMessage]);
+	}, [outgoingMessage, readyState]);
 
 	const toggleRecording = async () => {
 		const isRecording = recorder.current?.state === 'recording';
@@ -118,11 +122,11 @@ export const RecordingToggle: FC<RecordProps> = ({
 				// N.B - if this padding changes or is removed, the back end
 				//       will need updating to match
 				const langsBuffer = stringToBuffer(`${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`);
-
 				outgoingMessage.set(langsBuffer, 1);
 
 				const recordingBuffer = await event.data.arrayBuffer();
 				outgoingMessage.set(new Uint8Array(recordingBuffer), 1 + langsBuffer.length);
+
 				setOutgoingMessage(outgoingMessage.buffer);
 			};
 
@@ -137,7 +141,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 			recorder.current.stop();
 			recorder.current.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
-			// clear the state to force re-instantiation if/when user attempts
+			// clear the ref to force re-instantiation if/when user attempts
 			// to record again
 			recorder.current = undefined;
 		}

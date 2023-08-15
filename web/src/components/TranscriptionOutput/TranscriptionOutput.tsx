@@ -1,45 +1,47 @@
-import { FC } from "react";
+import { FC } from 'react';
 
-import LANGUAGES from "@/lib/data/languages.json";
-import { LanguageCode } from "@/lib/types/language";
+import LANGUAGES from '@/lib/data/languages.json';
+import { LanguageCode } from '@/lib/types/language';
 
-import "./styles.css";
+import './styles.css';
 
 type TranscriptionOutputProps = {
-  langFrom: LanguageCode;
-  langTo: LanguageCode;
-  transcribed: string;
-  translated: string;
+	langFrom: LanguageCode;
+	langTo: LanguageCode;
+	transcribed: string;
+	translated: string;
 };
 
 export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
-  langFrom,
-  langTo,
-  transcribed,
-  translated,
+	langFrom,
+	langTo,
+	transcribed,
+	translated
 }) => {
-  const sourceLanguage = LANGUAGES[langFrom];
-  const outputLanguage = LANGUAGES[langTo];
+	const sourceLanguage = LANGUAGES[langFrom];
+	const outputLanguage = LANGUAGES[langTo];
 
-  return (
-    <div className="output">
-      {transcribed || translated ? (
-        <>
-          <p className="section-title">Heard (in {sourceLanguage}):</p>
-          {transcribed && <p className="section-text">{transcribed}</p>}
+	return (
+		<div className="output">
+			{transcribed || translated ? (
+				<>
+					<p className="section-title">Heard (in {sourceLanguage}):</p>
+					{transcribed && <p className="section-text">{transcribed}</p>}
 
-          {langFrom !== langTo && (
-            <>
-              <p className="section-title">Translated (to {outputLanguage}):</p>
-              {translated && <p className="section-text">{translated}</p>}
-            </>
-          )}
-        </>
-      ) : (
-        <p>Hit record &amp; say something to see the output here</p>
-      )}
-    </div>
-  );
+					{langFrom !== langTo && translated && (
+						<>
+							<p className="section-title">Translated (to {outputLanguage}):</p>
+							<p className="section-text" lang={`${langTo}-x-frm-${langFrom}`}>
+								{translated}
+							</p>
+						</>
+					)}
+				</>
+			) : (
+				<p>Hit record &amp; say something to see the output here</p>
+			)}
+		</div>
+	);
 };
 
-TranscriptionOutput.displayName = "TranscriptionOutput";
+TranscriptionOutput.displayName = 'TranscriptionOutput';
