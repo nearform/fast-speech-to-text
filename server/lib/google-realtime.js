@@ -14,12 +14,11 @@ function googleRealtime(instance, opts, done) {
   ) {
     throw new Error("speechToText must be provided");
   }
-  instance.decorate("speechToText", opts.speechToText);
-
   if (!opts.translator || !(opts.translator instanceof GoogleTranslate)) {
     throw new Error("translator must be provided");
   }
 
+  instance.decorate("speechToText", opts.speechToText);
   instance.decorate("translator", opts.translator);
 
   instance.get("/transcribe", { websocket: true }, (connection) => {
@@ -70,7 +69,6 @@ function googleRealtime(instance, opts, done) {
       const [stateCode, langs, recording] = deconstructMessage(rawData);
 
       const [translateFrom, translateTo] = langs;
-      console.log("stateCode:", stateCode);
       switch (stateCode) {
         case 0:
           {
