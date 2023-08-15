@@ -11,12 +11,12 @@
 .output .section-title {
 	font-weight: bold;
 	font-size: 1.2em;
+	margin-bottom: 0px;
 }
 
 .output .section-text {
 	font-weight: normal;
 	font-style: italic;
-	margin: 0px;
 }
 .output .section-text::before,
 .output .section-text::after {
