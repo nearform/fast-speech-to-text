@@ -1,0 +1,7 @@
+.chunk-slider {
+	display: inline-flex;
+}
+
+.chunk-slider input {
+	margin: 0px 0.5em;
+}
