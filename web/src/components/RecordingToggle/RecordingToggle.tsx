@@ -31,7 +31,6 @@ export const RecordingToggle: FC<RecordProps> = ({
 	onTranscriptionChange
 }) => {
 	const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>([]);
-	const [outgoingMessage, setOutgoingMessage] = useState<OutgoingMessage>();
 	const [isRecording, setIsRecording] = useState<boolean>(false);
 
 	const recorder = useRef<MediaRecorder>();
@@ -75,30 +74,6 @@ export const RecordingToggle: FC<RecordProps> = ({
 		}
 	}, [getWebSocket()]);
 
-	// send message(s) to webSocket
-	useEffect(() => {
-		if (!outgoingMessage) {
-			// no message to send, just bail out
-			return;
-		}
-
-		// convert to ArrayBuffer prior to sending
-		const binaryMsg: ArrayBuffer =
-			typeof outgoingMessage === 'string' ? stringToBuffer(outgoingMessage) : outgoingMessage;
-
-		if (readyState === ReadyState.CONNECTING) {
-			if (!bufferedMessages.includes(binaryMsg)) {
-				console.debug('WebSocket not yet connected, adding message to buffer to send later');
-				setBufferedMessages((prev) => [...prev, binaryMsg]);
-			}
-		} else if (readyState === ReadyState.OPEN) {
-			console.debug('WebSocket connection active, sending message');
-			sendMessage(binaryMsg);
-		} else {
-			console.warn('WebSocket not in a ready state, message will not be sent.');
-		}
-	}, [outgoingMessage, readyState]);
-
 	const toggleRecording = async () => {
 		const isRecording = recorder.current?.state === 'recording';
 
@@ -126,7 +101,21 @@ export const RecordingToggle: FC<RecordProps> = ({
 				const recordingBuffer = await event.data.arrayBuffer();
 				outgoingMessage.set(new Uint8Array(recordingBuffer), 1 + langsBuffer.length);
 
-				setOutgoingMessage(outgoingMessage.buffer);
+				// convert to ArrayBuffer prior to sending
+				const binaryMsg: ArrayBuffer =
+					typeof outgoingMessage === 'string' ? stringToBuffer(outgoingMessage) : outgoingMessage;
+
+				if (readyState === ReadyState.CONNECTING) {
+					if (!bufferedMessages.includes(binaryMsg)) {
+						console.debug('WebSocket not yet connected, adding message to buffer to send later');
+						setBufferedMessages((prev) => [...prev, binaryMsg]);
+					}
+				} else if (readyState === ReadyState.OPEN) {
+					console.debug('WebSocket connection active, sending message');
+					sendMessage(binaryMsg);
+				} else {
+					console.warn('WebSocket not in a ready state, message will not be sent.');
+				}
 			};
 
 			recorder.current.onerror = (event: Event) => {

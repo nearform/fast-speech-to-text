@@ -25,29 +25,32 @@ const App = () => {
 
 	const [lastSpokenWords, setLastSpokenWords] = useState<string>('');
 
-	const [transcribed, setTranscribed] = useState<string>('');
-	const [translated, setTranslated] = useState<string>('');
+	const [transcriptionResult, setTranscriptionResult] = useState<{
+		transcribed: string;
+		translated?: string;
+	}>({ transcribed: '' });
 
 	const handleTranscriptionOutput = (transcription: TranscriptionData): void => {
 		const {
 			transcription: { original, translated }
 		} = transcription;
 
-		setTranscribed(original.text);
-		setTranslated(translated?.text || '');
+		setTranscriptionResult({
+			transcribed: original.text,
+			translated: translated?.text
+		});
 	};
 
 	useEffect(() => {
-		setTranscribed('');
-		setTranslated('');
+		setTranscriptionResult({ transcribed: '' });
 	}, [inputLang, outputLang]);
 
 	useEffect(() => {
-		const sentence = translated || transcribed;
+		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
 		const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
 		readBack(wordsToSay, outputLang);
 		setLastSpokenWords(sentence);
-	}, [transcribed, translated, outputLang]);
+	}, [transcriptionResult.transcribed, transcriptionResult.translated, outputLang]);
 
 	return (
 		<div className="container">
@@ -72,8 +75,8 @@ const App = () => {
 			<TranscriptionOutput
 				langFrom={inputLang}
 				langTo={outputLang}
-				transcribed={transcribed}
-				translated={translated}
+				transcribed={transcriptionResult.transcribed}
+				translated={transcriptionResult.translated}
 			/>
 		</div>
 	);
