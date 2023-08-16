@@ -55,12 +55,11 @@ export const RecordingToggle: FC<RecordProps> = ({
 		onMessage: (event: MessageEvent) => {
 			const decoder = new TextDecoder();
 			const message = JSON.parse(decoder.decode(event.data as ArrayBuffer));
-			console.log(message);
 			onTranscriptionChange(message);
 		},
 		shouldReconnect: () => true,
 		reconnectAttempts: 5,
-		reconnectInterval: (attemptNo: number) => 200 * attemptNo,
+		reconnectInterval: (attemptNo: number) => 500 * attemptNo,
 		onReconnectStop: (attempts) =>
 			console.warn(`Giving up re-establishing connection after ${attempts} attempts`)
 	});
