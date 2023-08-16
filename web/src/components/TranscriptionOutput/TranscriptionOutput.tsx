@@ -22,25 +22,26 @@ export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
 	const outputLanguage = LANGUAGES[langTo];
 
 	return (
-		<div className="output">
-			{transcribed || translated ? (
-				<>
-					<p className="section-title">Heard (in {sourceLanguage}):</p>
-					{transcribed && <p className="section-text">{transcribed}</p>}
-
-					{langFrom !== langTo && translated && (
-						<>
-							<p className="section-title">Translated (to {outputLanguage}):</p>
-							<p className="section-text" lang={`${langTo}-x-frm-${langFrom}`}>
-								{translated}
-							</p>
-						</>
-					)}
-				</>
-			) : (
-				<p>Hit record &amp; say something to see the output here</p>
+		<>
+			{transcribed && (
+				<div className="output from">
+					<p className="output-title">
+						Heard in:&nbsp;
+						<span className="output-language">{sourceLanguage}</span>
+					</p>
+					<p className="output-text">{transcribed}</p>
+				</div>
 			)}
-		</div>
+			{translated && (
+				<div className="output to">
+					<p className="output-title">
+						Translated to:&nbsp;
+						<span className="output-language">{outputLanguage}</span>
+					</p>
+					<p className="output-text">{translated}</p>
+				</div>
+			)}
+		</>
 	);
 };
 

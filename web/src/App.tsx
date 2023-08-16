@@ -2,26 +2,35 @@ import { useEffect, useState } from 'react';
 
 import { ErrorBoundary } from 'react-error-boundary';
 
+import useLocalStorageState from 'use-local-storage-state';
+
 import {
 	ChunkSize,
+	Header,
+	History,
 	LanguageSelectors,
 	RecordingToggle,
-	Summary,
 	TranscriptionOutput
 } from '@/components';
 
 import { LanguageCode } from '@/lib/types/language';
-import { TranscriptionData } from '@/lib/types/transcription';
+import { TranscriptionData, TranslationResult } from '@/lib/types/transcription';
 
 import { readBack, sentenceDiff } from '@/lib/utils';
 
 import './App.css';
 
 const App = () => {
+	const [previousTranslations, setPreviousTranslations] = useLocalStorageState<TranslationResult[]>(
+		'previousTranslations',
+		{ defaultValue: [] }
+	);
 	const [chunkDuration, setChunkDuration] = useState<number>(500);
 
-	const [inputLang, setInputLang] = useState<LanguageCode>('en');
-	const [outputLang, setOutputLang] = useState<LanguageCode>(inputLang);
+	const [languages, setLanguages] = useState<{ from: LanguageCode; to: LanguageCode }>({
+		from: 'en',
+		to: 'en'
+	});
 
 	const [lastSpokenWords, setLastSpokenWords] = useState<string>('');
 
@@ -39,46 +48,71 @@ const App = () => {
 			transcribed: original.text,
 			translated: translated?.text
 		});
+
+		setPreviousTranslations([
+			...previousTranslations,
+			{ phrase: original.text, timestamp: Date.now(), translated: translated?.text }
+		]);
+	};
+
+	const handleChunkChange = (size: number | number[]) => {
+		if (Array.isArray(size)) {
+			setChunkDuration(size[0]);
+		} else {
+			setChunkDuration(size);
+		}
+	};
+
+	const handleSwitchLanguages = () => {
+		setLanguages({
+			from: languages.to,
+			to: languages.from
+		});
 	};
 
 	useEffect(() => {
 		setTranscriptionResult({ transcribed: '' });
-	}, [inputLang, outputLang]);
+	}, [languages.from, languages.to]);
 
 	useEffect(() => {
 		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
 		const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
-		readBack(wordsToSay, outputLang);
+		readBack(wordsToSay, languages.to);
 		setLastSpokenWords(sentence);
-	}, [transcriptionResult.transcribed, transcriptionResult.translated, outputLang]);
+	}, [transcriptionResult.transcribed, transcriptionResult.translated, languages.to]);
 
 	return (
-		<div className="container">
-			<Summary />
-			<ChunkSize chunkSize={chunkDuration} onChange={setChunkDuration} />
-			<LanguageSelectors
-				inputLang={inputLang}
-				outputLang={outputLang}
-				onInputChange={setInputLang}
-				onOutputChange={setOutputLang}
-			/>
-
-			<ErrorBoundary fallback={<p>error in RecordingToggle</p>}>
-				<RecordingToggle
-					chunkDuration={chunkDuration}
-					langFrom={inputLang}
-					langTo={outputLang}
-					onTranscriptionChange={handleTranscriptionOutput}
+		<>
+			<Header onToggleMenu={() => {}} />
+			<div className="container">
+				<LanguageSelectors
+					inputLang={languages.from}
+					outputLang={languages.to}
+					onInputChange={(from: LanguageCode) => setLanguages({ ...languages, from })}
+					onOutputChange={(to: LanguageCode) => setLanguages({ ...languages, to })}
+					onSwitchClick={handleSwitchLanguages}
 				/>
-			</ErrorBoundary>
+				<ChunkSize chunkSize={chunkDuration} onChange={handleChunkChange} />
 
-			<TranscriptionOutput
-				langFrom={inputLang}
-				langTo={outputLang}
-				transcribed={transcriptionResult.transcribed}
-				translated={transcriptionResult.translated}
-			/>
-		</div>
+				<ErrorBoundary fallback={<p>error in RecordingToggle</p>}>
+					<RecordingToggle
+						chunkDuration={chunkDuration}
+						langFrom={languages.from}
+						langTo={languages.to}
+						onTranscriptionChange={handleTranscriptionOutput}
+					/>
+				</ErrorBoundary>
+
+				<TranscriptionOutput
+					langFrom={languages.from}
+					langTo={languages.to}
+					transcribed={transcriptionResult.transcribed}
+					translated={transcriptionResult.translated}
+				/>
+
+				<History />
+			</div>
+		</>
 	);
 };
 

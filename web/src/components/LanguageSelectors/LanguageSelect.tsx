@@ -1,33 +1,41 @@
-import { ChangeEvent, FC } from "react";
+import { ChangeEvent, FC } from 'react';
 
-import languagesLookup from "@/lib/data/languages.json";
+import languagesLookup from '@/lib/data/languages.json';
 
-import { LanguageCode } from "@/lib/types/language";
+import { LanguageCode } from '@/lib/types/language';
 
-const AVAILABLE_COUNTRIES: [string, string][] =
-  Object.entries<string>(languagesLookup);
+const AVAILABLE_COUNTRIES: [string, string][] = Object.entries<string>(languagesLookup);
+
+import './styles.css';
 
 type LanguageSelectProps = {
-  keyPrefix: string;
-  onChange: (lang: LanguageCode) => void;
-  value: LanguageCode;
+	keyPrefix: string;
+	label?: string;
+	onChange: (lang: LanguageCode) => void;
+	value: LanguageCode;
 };
 
-export const LanguageSelect: FC<LanguageSelectProps> = ({
-  keyPrefix,
-  onChange,
-  value,
-}) => {
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) =>
-    onChange(event.target.value as LanguageCode);
+export const LanguageSelect: FC<LanguageSelectProps> = ({ keyPrefix, label, onChange, value }) => {
+	const handleChange = (event: ChangeEvent<HTMLSelectElement>) =>
+		onChange(event.target.value as LanguageCode);
 
-  return (
-    <select defaultValue={value} onChange={handleChange}>
-      {AVAILABLE_COUNTRIES.map(([code, name]) => (
-        <option key={`${keyPrefix}-${code}`} value={code}>
-          {name}
-        </option>
-      ))}
-    </select>
-  );
+	return (
+		<div className="language-container">
+			<label htmlFor={`${keyPrefix}-select`}>
+				{label}:
+				<select
+					value={value}
+					onChange={handleChange}
+					id={`${keyPrefix}-select`}
+					name={`${keyPrefix}-select`}
+				>
+					{AVAILABLE_COUNTRIES.map(([code, name]) => (
+						<option key={`${keyPrefix}-${code}`} value={code}>
+							{name}
+						</option>
+					))}
+				</select>
+			</label>
+		</div>
+	);
 };

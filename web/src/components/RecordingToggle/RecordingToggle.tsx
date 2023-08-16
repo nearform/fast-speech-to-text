@@ -1,6 +1,8 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
+import { FiMic as StartRecording, FiMicOff as StopRecording } from 'react-icons/fi';
+
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 import _set from 'lodash.set';
@@ -137,7 +139,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 
 	return (
 		<button className={clsx('recording-toggle', { active: isRecording })} onClick={toggleRecording}>
-			<div className="icon" />
+			{isRecording ? <StopRecording /> : <StartRecording />}
 		</button>
 	);
 };
