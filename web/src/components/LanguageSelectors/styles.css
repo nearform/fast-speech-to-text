@@ -44,4 +44,12 @@ select {
 	.languages-container {
 		flex-direction: column;
 	}
+
+	.language-container {
+		width: 85%;
+	}
+
+	.language-switcher {
+		margin: 10px;
+	}
 }

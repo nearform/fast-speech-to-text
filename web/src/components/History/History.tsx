@@ -12,20 +12,19 @@ export const History: FC = () => {
 		defaultValue: []
 	});
 
-	return (
-		phrases.length && (
-			<div className="history-container">
-				{phrases.map((item, idx) => (
-					<HistoryItem
-						key={`history-${idx}`}
-						phrase={item.phrase}
-						timestamp={item.timestamp}
-						translated={item.translated}
-					/>
-				))}
-			</div>
-		)
-	);
+	return phrases.length ? (
+		<div className="history-container">
+			{phrases.map((item, idx) => (
+				<HistoryItem
+					key={`history-${idx}`}
+					languages={item.languages}
+					phrase={item.phrase}
+					timestamp={item.timestamp}
+					translated={item.translated}
+				/>
+			))}
+		</div>
+	) : null;
 };
 
 History.displayName = 'History';

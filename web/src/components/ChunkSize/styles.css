@@ -28,3 +28,9 @@ you to customise the active state of the handle for some reason
 	border: none;
 	box-shadow: none;
 }
+
+@media screen and (max-width: 750px) {
+	.chunk-size {
+		width: 85%;
+	}
+}

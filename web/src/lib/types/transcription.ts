@@ -9,6 +9,7 @@ export type TranscriptionData = {
 
 export type TranslationResult = {
 	phrase: string;
+	languages: { from: LanguageCode; to: LanguageCode };
 	translated?: string;
 	timestamp: number;
 };

@@ -1,46 +1,47 @@
 .history-item {
+	background-color: white;
+	border-radius: 3px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	min-height: 50px;
-	width: 350px;
-	background-color: white;
-	border-radius: 3px;
 	padding: 10px 15px;
 	text-align: left;
-	grid-column-start: auto;
-	grid-row-start: auto;
+	width: 350px;
 }
 
 .history-item h1 {
-	font-size: 1.2em;
 	color: #999;
+	font-size: 1.2em;
+	margin-bottom: 5px;
 	margin: 0;
+}
+.history-item h1 > span {
+	color: #aaa;
+	font-weight: lighter;
+	font-size: 0.8em;
 	margin-bottom: 5px;
 }
 .history-item p.translated {
+	color: #bbb;
 	font-size: 1em;
 	margin: 0;
-	color: #bbb;
 }
 .history-item p.timestamp {
-	font-size: 0.8em;
-	margin: 0;
-	margin-top: 5px;
 	color: #ccc;
+	font-size: 0.8em;
+	margin-top: 5px;
+	margin: 0;
 }
 
 .history-container {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-column-gap: 15px;
-	grid-row-gap: 15px;
-	grid-auto-flow: dense;
+	column-gap: 15px;
+	display: flex;
+	flex-wrap: wrap;
 	margin-top: 50px;
-}
-
-@media screen and (max-width: 750px) {
-	.history-container {
-		grid-template-columns: 1fr;
-	}
+	row-gap: 10px;
+	width: 85%;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 15px;
 }

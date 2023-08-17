@@ -16,7 +16,7 @@ import {
 import { LanguageCode } from '@/lib/types/language';
 import { TranscriptionData, TranslationResult } from '@/lib/types/transcription';
 
-import { readBack, sentenceDiff } from '@/lib/utils';
+import { readBackAndStore, sentenceDiff } from '@/lib/utils';
 
 import './App.css';
 
@@ -48,11 +48,6 @@ const App = () => {
 			transcribed: original.text,
 			translated: translated?.text
 		});
-
-		setPreviousTranslations([
-			...previousTranslations,
-			{ phrase: original.text, timestamp: Date.now(), translated: translated?.text }
-		]);
 	};
 
 	const handleChunkChange = (size: number | number[]) => {
@@ -77,7 +72,17 @@ const App = () => {
 	useEffect(() => {
 		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
 		const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
-		readBack(wordsToSay, languages.to);
+		readBackAndStore(wordsToSay, languages.to, () => {
+			setPreviousTranslations([
+				{
+					phrase: transcriptionResult.transcribed,
+					languages,
+					timestamp: Date.now(),
+					translated: transcriptionResult.translated
+				},
+				...previousTranslations.slice(0, 9) // only allow up to 10 in the history
+			]);
+		});
 		setLastSpokenWords(sentence);
 	}, [transcriptionResult.transcribed, transcriptionResult.translated, languages.to]);
 

@@ -11,7 +11,6 @@
 	justify-content: space-between;
 	align-items: center;
 	padding-left: 25px;
-	padding-right: 25px;
 }
 
 .header-bar h1 {
@@ -25,6 +24,6 @@
 .header-bar .menu-toggler {
 	cursor: pointer;
 	font-size: 2em;
-	/* margin-right: 25px; */
+	margin-right: 20px;
 	margin-top: 7.5px;
 }
