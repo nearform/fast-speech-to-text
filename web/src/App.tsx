@@ -80,7 +80,7 @@ const App = () => {
 					timestamp: Date.now(),
 					translated: transcriptionResult.translated
 				},
-				...previousTranslations.slice(0, 9) // only allow up to 10 in the history
+				...previousTranslations.slice(0, 8) // only allow up to 10 in the history
 			]);
 		});
 		setLastSpokenWords(sentence);
