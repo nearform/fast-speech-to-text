@@ -46,17 +46,21 @@ export const sentenceDiff = (a: string, b: string): string => {
   return diff.join(' ');
 };
 
+export const say = (sentence: string, language: LanguageCode) => {
+  if (window.speechSynthesis) {
+    const utterance = new SpeechSynthesisUtterance(sentence);
+    utterance.lang = language;
+    utterance.rate = 0.8;
+    // clear any previous utterances that have yet to be spoken
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  }
+};
+
 export const sayAndStore = (sentence: string, language: LanguageCode, storeInLS: () => void) => {
   if (sentence.length) {
+    say(sentence, language);
     storeInLS();
-    if (window.speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance(sentence);
-      utterance.lang = language;
-      utterance.rate = 0.8;
-      // clear any previous utterances that have yet to be spoken
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
-    }
   }
 };
 
