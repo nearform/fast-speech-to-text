@@ -77,9 +77,9 @@ export const RecordingToggle: FC<RecordProps> = ({
 	}, [getWebSocket()]);
 
 	const toggleRecording = async () => {
-		const isRecording = recorder.current?.state === 'recording';
+		const recording = recorder.current?.state === 'recording';
 
-		if ((recorder.current && !isRecording) || !recorder.current) {
+		if ((recorder.current && !recording) || !recorder.current) {
 			const mediaStream = await navigator.mediaDevices.getUserMedia({
 				audio: { sampleRate: 48000 },
 				video: false
@@ -126,7 +126,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 
 			recorder.current.start(chunkDuration);
 			setIsRecording(true);
-		} else if (recorder.current && isRecording) {
+		} else if (recorder.current && recording) {
 			setIsRecording(false);
 			recorder.current.stop();
 			recorder.current.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
