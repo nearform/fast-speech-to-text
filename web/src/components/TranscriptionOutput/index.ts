@@ -1,1 +1,1 @@
-export * from "./TranscriptionOutput";
+export * from './TranscriptionOutput';

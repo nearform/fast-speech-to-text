@@ -1,0 +1,60 @@
+.history-item {
+  background-color: white;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 50px;
+  padding: 10px 15px;
+  text-align: left;
+  width: 350px;
+
+  transition: linear all 0.1s;
+}
+
+.history-item:hover {
+  background-color: #ddd;
+  transition: linear all 0.1s;
+}
+
+.history-item h1 {
+  color: #666;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+  margin: 0;
+}
+.history-item h1 > span {
+  color: #888;
+  font-weight: lighter;
+  font-size: 0.8em;
+  margin-bottom: 5px;
+}
+.history-item p.translated {
+  color: #999;
+  font-size: 1em;
+  margin: 0;
+}
+.history-item p.timestamp {
+  color: #aaa;
+  font-size: 0.8em;
+  margin-top: 5px;
+  margin: 0;
+}
+
+.history-container {
+  column-gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 50px;
+  row-gap: 10px;
+  width: 85%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.history-container h2.history-title {
+  font-size: 1.25em;
+  font-weight: normal;
+}

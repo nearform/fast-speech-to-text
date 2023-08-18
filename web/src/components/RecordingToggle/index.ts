@@ -1,1 +1,1 @@
-export * from "./RecordingToggle";
+export * from './RecordingToggle';

@@ -1,7 +1,36 @@
-.chunk-slider {
-	display: inline-flex;
+.chunk-size {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  margin-bottom: 30px;
 }
 
-.chunk-slider input {
-	margin: 0px 0.5em;
+.chunk-size .label {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.chunk-size .label span:first-of-type {
+  font-weight: lighter;
+}
+.chunk-size .label span:last-of-type {
+  font-weight: bold;
+}
+
+/*
+Override styling from rc-slider component, the props don't allow
+you to customise the active state of the handle for some reason
+ */
+.chunk-size .chunk-slider .rc-slider-handle:active {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+@media screen and (max-width: 750px) {
+  .chunk-size {
+    width: 85%;
+  }
 }

@@ -2,84 +2,130 @@ import { useEffect, useState } from 'react';
 
 import { ErrorBoundary } from 'react-error-boundary';
 
+import useLocalStorageState from 'use-local-storage-state';
+
 import {
-	ChunkSize,
-	LanguageSelectors,
-	RecordingToggle,
-	Summary,
-	TranscriptionOutput
+  ChunkSize,
+  Header,
+  History,
+  LanguageSelectors,
+  RecordingToggle,
+  TranscriptionOutput
 } from '@/components';
 
 import { LanguageCode } from '@/lib/types/language';
-import { TranscriptionData } from '@/lib/types/transcription';
+import { TranscriptionData, TranslationResult } from '@/lib/types/transcription';
 
-import { readBack, sentenceDiff } from '@/lib/utils';
+// TODO: fix sentence differ for iterative speech synth
+import { readBackAndStore, sentenceDiff } from '@/lib/utils';
 
 import './App.css';
 
 const App = () => {
-	const [chunkDuration, setChunkDuration] = useState<number>(500);
+  const [previousTranslations, setPreviousTranslations] = useLocalStorageState<TranslationResult[]>(
+    'previousTranslations',
+    { defaultValue: [] }
+  );
+  const [chunkDuration, setChunkDuration] = useState<number>(1200);
 
-	const [inputLang, setInputLang] = useState<LanguageCode>('en');
-	const [outputLang, setOutputLang] = useState<LanguageCode>(inputLang);
+  const [languages, setLanguages] = useState<{ from: LanguageCode; to: LanguageCode }>({
+    from: 'en',
+    to: 'en'
+  });
 
-	const [lastSpokenWords, setLastSpokenWords] = useState<string>('');
+  const [lastSpokenWords, setLastSpokenWords] = useState<string>('');
 
-	const [transcriptionResult, setTranscriptionResult] = useState<{
-		transcribed: string;
-		translated?: string;
-	}>({ transcribed: '' });
+  const [transcriptionResult, setTranscriptionResult] = useState<{
+    transcribed: string;
+    translated?: string;
+  }>({ transcribed: '' });
 
-	const handleTranscriptionOutput = (transcription: TranscriptionData): void => {
-		const {
-			transcription: { original, translated }
-		} = transcription;
+  const [isRecording, setIsRecording] = useState<boolean>(false);
 
-		setTranscriptionResult({
-			transcribed: original.text,
-			translated: translated?.text
-		});
-	};
+  const handleTranscriptionOutput = (transcription: TranscriptionData): void => {
+    const {
+      transcription: { original, translated }
+    } = transcription;
 
-	useEffect(() => {
-		setTranscriptionResult({ transcribed: '' });
-	}, [inputLang, outputLang]);
+    setTranscriptionResult({
+      transcribed: original.text,
+      translated: translated?.text
+    });
+  };
 
-	useEffect(() => {
-		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
-		const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
-		readBack(wordsToSay, outputLang);
-		setLastSpokenWords(sentence);
-	}, [transcriptionResult.transcribed, transcriptionResult.translated, outputLang]);
+  const handleChunkChange = (size: number | number[]) => {
+    if (Array.isArray(size)) {
+      setChunkDuration(size[0]);
+    } else {
+      setChunkDuration(size);
+    }
+  };
 
-	return (
-		<div className="container">
-			<Summary />
-			<ChunkSize chunkSize={chunkDuration} onChange={setChunkDuration} />
-			<LanguageSelectors
-				inputLang={inputLang}
-				outputLang={outputLang}
-				onInputChange={setInputLang}
-				onOutputChange={setOutputLang}
-			/>
+  const handleSwitchLanguages = () => {
+    setLanguages({
+      from: languages.to,
+      to: languages.from
+    });
+  };
 
-			<ErrorBoundary fallback={<p>error in RecordingToggle</p>}>
-				<RecordingToggle
-					chunkDuration={chunkDuration}
-					langFrom={inputLang}
-					langTo={outputLang}
-					onTranscriptionChange={handleTranscriptionOutput}
-				/>
-			</ErrorBoundary>
+  useEffect(() => {
+    setTranscriptionResult({ transcribed: '' });
+  }, [languages.from, languages.to]);
 
-			<TranscriptionOutput
-				langFrom={inputLang}
-				langTo={outputLang}
-				transcribed={transcriptionResult.transcribed}
-				translated={transcriptionResult.translated}
-			/>
-		</div>
-	);
+  useEffect(() => {
+    if (!isRecording) {
+      const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
+      if (sentence !== lastSpokenWords) {
+        readBackAndStore(sentence, languages.to, () => {
+          setPreviousTranslations([
+            {
+              phrase: transcriptionResult.transcribed,
+              languages,
+              timestamp: Date.now(),
+              translated: transcriptionResult.translated
+            },
+            ...previousTranslations.slice(0, 9) // only allow up to 10 in the history
+          ]);
+        });
+        setLastSpokenWords(sentence);
+      }
+    }
+  }, [transcriptionResult.transcribed, transcriptionResult.translated, languages.to, isRecording]);
+
+  return (
+    <>
+      <Header onToggleMenu={() => {}} />
+      <div className="container">
+        <LanguageSelectors
+          inputLang={languages.from}
+          outputLang={languages.to}
+          onInputChange={(from: LanguageCode) => setLanguages({ ...languages, from })}
+          onOutputChange={(to: LanguageCode) => setLanguages({ ...languages, to })}
+          onSwitchClick={handleSwitchLanguages}
+        />
+        <ChunkSize chunkSize={chunkDuration} onChange={handleChunkChange} />
+
+        <ErrorBoundary fallback={<p>error in RecordingToggle</p>}>
+          <RecordingToggle
+            chunkDuration={chunkDuration}
+            langFrom={languages.from}
+            langTo={languages.to}
+            onTranscriptionChange={handleTranscriptionOutput}
+            onRecordingToggle={() => setIsRecording(!isRecording)}
+          />
+        </ErrorBoundary>
+
+        <TranscriptionOutput
+          langFrom={languages.from}
+          langTo={languages.to}
+          transcribed={transcriptionResult.transcribed}
+          translated={transcriptionResult.translated}
+        />
+
+        <History />
+      </div>
+    </>
+  );
 };
 
 App.displayName = 'App';

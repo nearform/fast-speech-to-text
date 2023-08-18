@@ -1,26 +1,18 @@
-import debounce from "lodash.debounce";
+import debounce from 'lodash.debounce';
 
-import { LanguageCode } from "@/lib/types/language";
-import { TranscriptionData } from "@/lib/types/transcription";
+import { LanguageCode } from '@/lib/types/language';
+import { TranscriptionData } from '@/lib/types/transcription';
 
 export const isTranscriptionData = (o: unknown): o is TranscriptionData =>
-  o != null &&
-  typeof o === "object" &&
-  "type" in o &&
-  o.type === "transcription";
+  o != null && typeof o === 'object' && 'type' in o && o.type === 'transcription';
 
-export const stringToBuffer = (
-  str: string,
-  statusCode?: number
-): Uint8Array => {
+export const stringToBuffer = (str: string, statusCode?: number): Uint8Array => {
   const encoder = new TextEncoder();
   const encoded = encoder.encode(str);
 
   const includeStatusCode = statusCode !== undefined;
 
-  const buffer = new Uint8Array(
-    encoded.byteLength + (includeStatusCode ? 1 : 0)
-  );
+  const buffer = new Uint8Array(encoded.byteLength + (includeStatusCode ? 1 : 0));
 
   if (includeStatusCode) {
     buffer[0] = statusCode;
@@ -33,8 +25,8 @@ export const stringToBuffer = (
 };
 
 export const sentenceDiff = (a: string, b: string): string => {
-  const arrA = a.split(" ");
-  const arrB = b.split(" ");
+  const arrA = a.split(' ');
+  const arrB = b.split(' ');
 
   let diff: string[] = [];
 
@@ -43,10 +35,7 @@ export const sentenceDiff = (a: string, b: string): string => {
   } else {
     const differentIdx = arrB.findIndex((word, idx) => arrA[idx] !== word);
 
-    if (
-      differentIdx < arrA.length - 1 ||
-      (arrA.length === 1 && differentIdx === 0)
-    ) {
+    if (differentIdx < arrA.length - 1 || (arrA.length === 1 && differentIdx === 0)) {
       // change mid-sentence, treat as whole new sentence
       diff = arrB;
     } else if (differentIdx >= arrA.length) {
@@ -54,15 +43,25 @@ export const sentenceDiff = (a: string, b: string): string => {
     }
   }
 
-  return diff.join(" ");
+  return diff.join(' ');
 };
 
-export const saySomething = (sentence: string, language: LanguageCode) => {
-  if (sentence.length && window.speechSynthesis) {
+export const say = (sentence: string, language: LanguageCode) => {
+  if (window.speechSynthesis) {
     const utterance = new SpeechSynthesisUtterance(sentence);
     utterance.lang = language;
+    utterance.rate = 0.8;
+    // clear any previous utterances that have yet to be spoken
+    speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
   }
 };
 
-export const readBack = debounce(saySomething, 500);
+export const sayAndStore = (sentence: string, language: LanguageCode, storeInLS: () => void) => {
+  if (sentence.length) {
+    say(sentence, language);
+    storeInLS();
+  }
+};
+
+export const readBackAndStore = debounce(sayAndStore, 500);
