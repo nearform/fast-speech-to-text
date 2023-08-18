@@ -19,13 +19,24 @@ select {
 	color: white;
 
 	border-radius: 50%;
-	height: 3em;
-	width: 3em;
+	height: 4em;
+	width: 4em;
 
 	align-items: center;
 	display: flex;
 	justify-content: center;
 	outline: none;
+	transition: linear all 0.1s;
+}
+.language-switcher:hover {
+	background-color: #18259e;
+
+	transition: linear all 0.1s;
+}
+
+.language-switcher svg {
+	width: 20px;
+	height: 20px;
 }
 
 .language-container {
@@ -37,7 +48,8 @@ select {
 
 	margin: 0px 1.25%;
 	padding: 30px 20px;
-	/* width: 40%; */
+	width: 40%;
+}
 }
 
 @media screen and (max-width: 750px) {

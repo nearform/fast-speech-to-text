@@ -26,8 +26,9 @@ export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
 			{transcribed && (
 				<div className="output from">
 					<p className="output-title">
+						{sourceLanguage.flag}
 						Heard in:&nbsp;
-						<span className="output-language">{sourceLanguage}</span>
+						<span className="output-language">{sourceLanguage.name}</span>
 					</p>
 					<p className="output-text">{transcribed}</p>
 				</div>
@@ -35,8 +36,9 @@ export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
 			{translated && (
 				<div className="output to">
 					<p className="output-title">
+						{outputLanguage.flag}
 						Translated to:&nbsp;
-						<span className="output-language">{outputLanguage}</span>
+						<span className="output-language">{outputLanguage.name}</span>
 					</p>
 					<p className="output-text">{translated}</p>
 				</div>

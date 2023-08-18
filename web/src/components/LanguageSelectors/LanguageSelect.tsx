@@ -4,7 +4,10 @@ import languagesLookup from '@/lib/data/languages.json';
 
 import { LanguageCode } from '@/lib/types/language';
 
-const AVAILABLE_COUNTRIES: [string, string][] = Object.entries<string>(languagesLookup);
+const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] = Object.entries<{
+	name: string;
+	flag: string;
+}>(languagesLookup);
 
 import './styles.css';
 
@@ -29,9 +32,9 @@ export const LanguageSelect: FC<LanguageSelectProps> = ({ keyPrefix, label, onCh
 					id={`${keyPrefix}-select`}
 					name={`${keyPrefix}-select`}
 				>
-					{AVAILABLE_COUNTRIES.map(([code, name]) => (
+					{AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
 						<option key={`${keyPrefix}-${code}`} value={code}>
-							{name}
+							{flag} {name}
 						</option>
 					))}
 				</select>

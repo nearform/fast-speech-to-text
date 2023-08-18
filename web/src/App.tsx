@@ -25,7 +25,7 @@ const App = () => {
 		'previousTranslations',
 		{ defaultValue: [] }
 	);
-	const [chunkDuration, setChunkDuration] = useState<number>(500);
+	const [chunkDuration, setChunkDuration] = useState<number>(1200);
 
 	const [languages, setLanguages] = useState<{ from: LanguageCode; to: LanguageCode }>({
 		from: 'en',
