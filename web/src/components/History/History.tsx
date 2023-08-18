@@ -1,17 +1,16 @@
 import { FC } from 'react';
-import useLocalStorageState from 'use-local-storage-state';
 
 import { TranslationResult } from '@/lib/types/transcription';
 
 import { HistoryItem } from './HistoryItem';
 
+type HistoryProps = {
+  phrases: TranslationResult[];
+};
+
 import './styles.css';
 
-export const History: FC = () => {
-  const [phrases] = useLocalStorageState<TranslationResult[]>('previousTranslations', {
-    defaultValue: []
-  });
-
+export const History: FC<HistoryProps> = ({ phrases }) => {
   return phrases.length ? (
     <div className="history-container">
       {phrases.map((item, idx) => (
