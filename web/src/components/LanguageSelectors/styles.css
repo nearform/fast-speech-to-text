@@ -80,11 +80,6 @@ select {
   pointer-events: none;
 }
 
-.language-container select option {
-  font-size: 0.5em;
-  font-weight: normal;
-}
-
 @media screen and (max-width: 750px) {
   .languages-container {
     flex-direction: column;

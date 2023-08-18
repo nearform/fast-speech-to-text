@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { ErrorBoundary } from 'react-error-boundary';
 
-import useLocalStorageState from 'use-local-storage-state';
-
 import {
   ChunkSize,
   Header,
@@ -22,10 +20,7 @@ import { readBackAndStore, sentenceDiff } from '@/lib/utils';
 import './App.css';
 
 const App = () => {
-  const [previousTranslations, setPreviousTranslations] = useLocalStorageState<TranslationResult[]>(
-    'previousTranslations',
-    { defaultValue: [] }
-  );
+  const [previousTranslations, setPreviousTranslations] = useState<TranslationResult[]>([]);
   const [chunkDuration, setChunkDuration] = useState<number>(1200);
 
   const [languages, setLanguages] = useState<{ from: LanguageCode; to: LanguageCode }>({
@@ -122,7 +117,7 @@ const App = () => {
           translated={transcriptionResult.translated}
         />
 
-        <History />
+        <History phrases={previousTranslations} />
       </div>
     </>
   );
