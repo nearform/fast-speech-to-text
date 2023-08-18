@@ -1,49 +1,49 @@
 .output {
-	display: flex;
-	flex-direction: column;
-	background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
-	border-radius: 5px;
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	/* padding: 1.5em; */
-	width: clamp(200px, 80%, 800px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* padding: 1.5em; */
+  width: clamp(200px, 80%, 800px);
 }
 
 .output .output-title {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	column-gap: 0.5ch;
-	font-weight: lighter;
-	margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.5ch;
+  font-weight: lighter;
+  margin-bottom: 0px;
 }
 
 .output .output-title .output-flag {
-	font-size: 1.5em;
+  font-size: 1.5em;
 }
 
 .output .output-title .output-language {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .output .output-text {
-	font-size: 18px;
-	font-weight: normal;
-	font-style: italic;
+  font-size: 18px;
+  font-weight: normal;
+  font-style: italic;
 }
 .output .output-text::before,
 .output .output-text::after {
-	content: '"';
+  content: '"';
 }
 
 .output.from {
-	margin-top: 50px;
+  margin-top: 50px;
 }
 .output.to {
-	margin-top: 15px;
+  margin-top: 15px;
 }
 
 @media screen and (max-width: 750px) {
-	.output.from {
-		margin-top: 20px;
-	}
+  .output.from {
+    margin-top: 20px;
+  }
 }

@@ -1,13 +1,13 @@
 body {
-	margin: 0px;
-	padding: 0px;
-	padding-top: 60px;
+  margin: 0px;
+  padding: 0px;
+  padding-top: 60px;
 
-	background-color: #2b3038;
-	color: white;
-	font-family: 'Helvetica', sans-serif;
-	display: flex;
-	justify-content: center;
+  background-color: #2b3038;
+  color: white;
+  font-family: 'Helvetica', sans-serif;
+  display: flex;
+  justify-content: center;
 
-	overflow-x: hidden;
+  overflow-x: hidden;
 }
