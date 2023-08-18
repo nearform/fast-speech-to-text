@@ -45,3 +45,8 @@
 	align-items: center;
 	margin-bottom: 15px;
 }
+
+.history-container h2.history-title {
+	font-size: 1.25em;
+	font-weight: normal;
+}

@@ -92,6 +92,11 @@ select {
 
 	.language-container {
 		width: 85%;
+		padding: 1.5em 20px;
+	}
+
+	.language-container select {
+		margin-top: 0.5em;
 	}
 
 	.language-switcher {

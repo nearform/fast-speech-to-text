@@ -70,9 +70,10 @@ const App = () => {
 	}, [languages.from, languages.to]);
 
 	useEffect(() => {
+		console.log('Should speak');
 		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
-		const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
-		readBackAndStore(wordsToSay, languages.to, () => {
+		// const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
+		readBackAndStore(sentence, languages.to, () => {
 			setPreviousTranslations([
 				{
 					phrase: transcriptionResult.transcribed,
@@ -80,7 +81,7 @@ const App = () => {
 					timestamp: Date.now(),
 					translated: transcriptionResult.translated
 				},
-				...previousTranslations.slice(0, 8) // only allow up to 10 in the history
+				...previousTranslations.slice(0, 9) // only allow up to 10 in the history
 			]);
 		});
 		setLastSpokenWords(sentence);

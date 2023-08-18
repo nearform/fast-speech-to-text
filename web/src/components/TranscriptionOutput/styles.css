@@ -33,3 +33,9 @@
 .output.to {
 	margin-top: 15px;
 }
+
+@media screen and (max-width: 750px) {
+	.output.from {
+		margin-top: 20px;
+	}
+}

@@ -34,7 +34,7 @@ export const LanguageSelect: FC<LanguageSelectProps> = ({ keyPrefix, label, onCh
 				>
 					{AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
 						<option key={`${keyPrefix}-${code}`} value={code}>
-							{flag} {name}
+							{name} {flag}
 						</option>
 					))}
 				</select>
