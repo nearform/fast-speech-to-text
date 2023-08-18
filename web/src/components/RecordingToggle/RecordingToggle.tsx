@@ -19,6 +19,7 @@ type RecordProps = {
 	chunkDuration: number;
 	langFrom: LanguageCode;
 	langTo: LanguageCode;
+	onRecordingToggle: () => void;
 	onTranscriptionChange: (transcription: TranscriptionData) => void;
 };
 
@@ -30,6 +31,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 	chunkDuration,
 	langFrom,
 	langTo,
+	onRecordingToggle,
 	onTranscriptionChange
 }) => {
 	const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>([]);
@@ -77,6 +79,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 	}, [getWebSocket()]);
 
 	const toggleRecording = async () => {
+		onRecordingToggle();
 		const recording = recorder.current?.state === 'recording';
 
 		if ((recorder.current && !recording) || !recorder.current) {

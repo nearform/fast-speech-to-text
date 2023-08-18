@@ -14,7 +14,6 @@ export const History: FC = () => {
 
 	return phrases.length ? (
 		<div className="history-container">
-			<h2 className="history-title">Your recent translations/transcriptions</h2>
 			{phrases.map((item, idx) => (
 				<HistoryItem
 					key={`history-${idx}`}

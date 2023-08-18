@@ -9,8 +9,16 @@
 }
 
 .output .output-title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	column-gap: 0.5ch;
 	font-weight: lighter;
 	margin-bottom: 0px;
+}
+
+.output .output-title .output-flag {
+	font-size: 1.5em;
 }
 
 .output .output-title .output-language {

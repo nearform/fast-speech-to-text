@@ -16,6 +16,7 @@ import {
 import { LanguageCode } from '@/lib/types/language';
 import { TranscriptionData, TranslationResult } from '@/lib/types/transcription';
 
+// TODO: fix sentence differ for iterative speech synth
 import { readBackAndStore, sentenceDiff } from '@/lib/utils';
 
 import './App.css';
@@ -38,6 +39,8 @@ const App = () => {
 		transcribed: string;
 		translated?: string;
 	}>({ transcribed: '' });
+
+	const [isRecording, setIsRecording] = useState<boolean>(false);
 
 	const handleTranscriptionOutput = (transcription: TranscriptionData): void => {
 		const {
@@ -70,22 +73,24 @@ const App = () => {
 	}, [languages.from, languages.to]);
 
 	useEffect(() => {
-		console.log('Should speak');
-		const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
-		// const wordsToSay = sentenceDiff(lastSpokenWords, sentence);
-		readBackAndStore(sentence, languages.to, () => {
-			setPreviousTranslations([
-				{
-					phrase: transcriptionResult.transcribed,
-					languages,
-					timestamp: Date.now(),
-					translated: transcriptionResult.translated
-				},
-				...previousTranslations.slice(0, 9) // only allow up to 10 in the history
-			]);
-		});
-		setLastSpokenWords(sentence);
-	}, [transcriptionResult.transcribed, transcriptionResult.translated, languages.to]);
+		if (!isRecording) {
+			const sentence = transcriptionResult.translated || transcriptionResult.transcribed;
+			if (sentence !== lastSpokenWords) {
+				readBackAndStore(sentence, languages.to, () => {
+					setPreviousTranslations([
+						{
+							phrase: transcriptionResult.transcribed,
+							languages,
+							timestamp: Date.now(),
+							translated: transcriptionResult.translated
+						},
+						...previousTranslations.slice(0, 9) // only allow up to 10 in the history
+					]);
+				});
+				setLastSpokenWords(sentence);
+			}
+		}
+	}, [transcriptionResult.transcribed, transcriptionResult.translated, languages.to, isRecording]);
 
 	return (
 		<>
@@ -106,6 +111,7 @@ const App = () => {
 						langFrom={languages.from}
 						langTo={languages.to}
 						onTranscriptionChange={handleTranscriptionOutput}
+						onRecordingToggle={() => setIsRecording(!isRecording)}
 					/>
 				</ErrorBoundary>
 
