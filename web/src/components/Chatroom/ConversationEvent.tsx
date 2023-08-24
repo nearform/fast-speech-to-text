@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, RefObject } from 'react';
 import clsx from 'clsx';
 
 import { ConversationEvent as IChatEvent } from '@/lib/types/chatroom';
@@ -7,10 +7,11 @@ import { MessageEvent } from './Message';
 
 type ConversationEventProps = {
   event: IChatEvent;
+  eventRef?: RefObject<HTMLDivElement>;
   sentByUser: boolean;
 };
 
-export const ConversationEvent: FC<ConversationEventProps> = ({ event, sentByUser }) => {
+export const ConversationEvent: FC<ConversationEventProps> = ({ event, eventRef, sentByUser }) => {
   return (
     <div
       className={clsx('chat-event-wrapper', {
@@ -18,6 +19,7 @@ export const ConversationEvent: FC<ConversationEventProps> = ({ event, sentByUse
         message: event.type === 'message',
         'own-event': sentByUser
       })}
+      ref={eventRef}
     >
       {event.type === 'entryExit' ? (
         <EntryExitEvent event={event.event} user={event.user} />

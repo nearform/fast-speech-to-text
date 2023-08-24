@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { Database } from 'firebase/database';
@@ -18,6 +18,8 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
   const { name: userName, language } = useRecoilValue(user);
   const { events, loading } = useMessages({ rtdbRef, roomId: room?.id });
 
+  const eventRef = useRef<HTMLDivElement>();
+
   useEffect(() => {
     const lastEvent = events[events.length - 1];
 
@@ -27,6 +29,8 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
 
       speechSynthesis.speak(utterance);
     }
+
+    eventRef.current?.scrollIntoView();
   }, [userName, events]);
 
   return (
@@ -37,6 +41,7 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
               event={event}
               key={`event-${idx + 1}`}
               sentByUser={event.user === userName}
+              eventRef={idx === events.length - 1 ? eventRef : undefined}
             />
           ))
         : null}
