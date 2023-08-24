@@ -22,9 +22,6 @@
   padding-left: 10px;
 }
 
-.chatroom-list-item:not(.create) .chatroom-info {
-  /* something here */
-}
 .chatroom-list-item:not(.create) .chatroom-info h1 {
   font-size: 1.25em;
   text-align: left;
@@ -46,4 +43,23 @@
   align-items: center;
   border: none;
   font-size: 1.5em;
+}
+
+.chatroom-list-item.create,
+.chatroom-list-item.create {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatroom-list-item.create .user-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 20px;
+}
+
+.chatroom-list-item.create .user-form select {
+  margin-left: 0;
 }
