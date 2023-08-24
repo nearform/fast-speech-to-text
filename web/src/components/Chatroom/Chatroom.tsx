@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import axios from 'axios';
@@ -33,6 +33,12 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   const isHost = useRecoilValue(userIsHost);
 
   const [{ chatroom, loading }] = useChatroom({ rtdbRef, roomId: room?.id });
+
+  useEffect(() => {
+    if (!chatroom) {
+      setRoom(null);
+    }
+  }, [chatroom]);
 
   const handleLeave = async () => {
     try {

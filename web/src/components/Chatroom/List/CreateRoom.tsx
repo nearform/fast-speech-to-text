@@ -52,6 +52,7 @@ export const CreateRoom = () => {
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setUser({ ...user, name: e.target.value })
           }
+          value={user.name}
         />
         <label htmlFor="userLang">Your language</label>
         <select
@@ -84,7 +85,7 @@ export const CreateRoom = () => {
           </button>
         </>
       ) : (
-        <p>Please provide your name & spoken language to create a new chatroom</p>
+        <p>Please provide your name & spoken language to create or join a chatroom</p>
       )}
     </div>
   );

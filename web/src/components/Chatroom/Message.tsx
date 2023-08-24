@@ -11,7 +11,7 @@ type MessageEventProps = {
 
 export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
   const [playing, setPlaying] = useState<boolean>(false);
-  // const formatToUse = differenceInDays(timestamp, Date.now()) ? 'dd/MM/yyyy HH:mm' : 'HH:mm';
+  const formatToUse = differenceInDays(timestamp, Date.now()) ? 'dd/MM/yyyy HH:mm' : 'HH:mm';
 
   const handleReplay = () => {
     setPlaying(!playing);
@@ -37,7 +37,7 @@ export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
           {playing ? <Stop /> : <Play />}
         </button>
       </div>
-      {/* <p className="message-event-timestamp">{format(new Date(timestamp), formatToUse)}</p> */}
+      <p className="message-event-timestamp">{format(new Date(timestamp), formatToUse)}</p>
     </div>
   );
 };

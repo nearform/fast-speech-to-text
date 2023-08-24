@@ -38,15 +38,15 @@ export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
   return (
     <div className="chatroom-list-container">
       {loading && <p>Fetching chatrooms, please wait...</p>}
-      {!loading && !chatrooms.length && <p>No chatrooms found. Why not create one?</p>}
       {!loading && (
         <>
           <CreateRoom />
-          {chatrooms.map((room) => (
+          {Object.values(user).every(Boolean) && chatrooms.map((room) => (
             <ListItem key={`room-${room.id}`} room={room} onClick={handleJoin} />
-          ))}
+            ))}
         </>
       )}
+      {!loading && !chatrooms.length && <p>No chatrooms found. Why not create one?</p>}
     </div>
   );
 };

@@ -141,6 +141,7 @@ function socket(instance, opts, done) {
                     original: transcript,
                     translated,
                   },
+                  timestamp: Date.now(),
                   type: "message",
                   user,
                 };
