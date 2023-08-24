@@ -1,25 +1,26 @@
 import stream from "node:stream/promises";
 
-import { GoogleSpeechToText } from "./speech-to-text.js";
-import { GoogleTranslate } from "./translate.js";
+import { TranscriptionClient } from "./transcribe.js";
+import { TranslationClient } from "./translate.js";
+import { RealtimeDatabaseClient } from "./rtdb.js";
 /**
  * @param {import('fastify').FastifyInstance} instance
  * @param {object} opts
  * @param {Function} done
  */
-function googleRealtime(instance, opts, done) {
-  if (
-    !opts.speechToText ||
-    !(opts.speechToText instanceof GoogleSpeechToText)
-  ) {
-    throw new Error("speechToText must be provided");
+function socket(instance, opts, done) {
+  if (!opts.transcriber || !(opts.transcriber instanceof TranscriptionClient)) {
+    throw new Error("transcriber must be provided");
   }
-  if (!opts.translator || !(opts.translator instanceof GoogleTranslate)) {
+  if (!opts.translator || !(opts.translator instanceof TranslationClient)) {
     throw new Error("translator must be provided");
   }
-
-  instance.decorate("speechToText", opts.speechToText);
+  if (!opts.rtdb || !(opts.rtdb instanceof RealtimeDatabaseClient)) {
+    throw new Error("rtdb must be provided");
+  }
+  instance.decorate("transcriber", opts.transcriber);
   instance.decorate("translator", opts.translator);
+  instance.decorate("rtdb", opts.rtdb);
 
   instance.get("/transcribe", { websocket: true }, (connection) => {
     connection.socket.on("connect", () => {
@@ -45,30 +46,37 @@ function googleRealtime(instance, opts, done) {
 
     /**
      * @param {Buffer} buffer
-     * @returns {[number, string[], Buffer]}
+     * @returns {[number, string, string, string, Buffer]}
      */
     function deconstructMessage(buffer) {
-      const langDecoder = new TextDecoder();
+      const decoder = new TextDecoder();
 
       const stateCode = buffer[0] ?? -1;
 
-      const langs = langDecoder
+      const langs = decoder
         .decode(buffer.subarray(1, 21))
         .replace(/\*/g, "")
         .split(":");
 
-      const audioContent = buffer.subarray(22);
+      const roomId = decoder.decode(buffer.subarray(22, 58));
 
-      return [stateCode, langs, audioContent];
+      let sender = decoder.decode(buffer.subarray(58, 83));
+      sender = sender.replaceAll("*", "");
+
+      const audioContent = buffer.subarray(83);
+
+      return [stateCode, langs[0], langs[1], roomId, sender, audioContent];
     }
 
     // populated when a new audio file starts to arrive
     /** @type {import('node:stream').Duplex | null} */
     let transcription = null;
-    connection.socket.on("message", (rawData) => {
-      const [stateCode, langs, recording] = deconstructMessage(rawData);
+    let message;
 
-      const [translateFrom, translateTo] = langs;
+    connection.socket.on("message", (rawData) => {
+      const [stateCode, translateFrom, translateTo, roomId, user, recording] =
+        deconstructMessage(rawData);
+
       switch (stateCode) {
         case 0:
           {
@@ -76,7 +84,7 @@ function googleRealtime(instance, opts, done) {
               { text: recording.toString("utf-8") },
               "Got text message from client"
             );
-            sendJson({ type: "msg", msg: "hey good-lookin" });
+            sendJson({ type: "msg", msg: "Connection established" });
           }
           break;
         case 1:
@@ -87,12 +95,12 @@ function googleRealtime(instance, opts, done) {
             );
             if (transcription == null) {
               transcription =
-                instance.speechToText.createTranscription(translateFrom);
+                instance.transcriber.createTranscription(translateFrom);
               transcription.on("data", async (data) => {
                 const transcript = data.results[0].alternatives[0].transcript;
 
                 let translated;
-                // if the to & from languages are the same, there's no point
+                // if the to & from languages are the same there's no point
                 // in translating them so just return the transcription
                 if (translateFrom !== translateTo) {
                   instance.log.info(
@@ -126,6 +134,17 @@ function googleRealtime(instance, opts, done) {
                   };
                 }
 
+                message = {
+                  message: {
+                    langFrom: translateFrom,
+                    langTo: translateTo,
+                    original: transcript,
+                    translated,
+                  },
+                  type: "message",
+                  user,
+                };
+
                 sendJson({
                   type: "transcription",
                   transcription: payload,
@@ -140,6 +159,10 @@ function googleRealtime(instance, opts, done) {
             }
 
             if (!transcription.closed && !transcription.destroyed) {
+              instance.log.info(
+                {},
+                "Writing recording to transcription stream"
+              );
               transcription.write(recording, null, (err) => {
                 if (err == null) return;
                 instance.log.error(
@@ -186,6 +209,10 @@ function googleRealtime(instance, opts, done) {
             stream.finished(transcription).then(() => {
               instance.log.info("transcription finished");
               transcription = null;
+
+              instance.log.info(message, "message");
+
+              instance.rtdb.push(`events/${roomId}`, message);
             });
           }
           break;
@@ -216,4 +243,4 @@ function googleRealtime(instance, opts, done) {
   done();
 }
 
-export default googleRealtime;
+export default socket;

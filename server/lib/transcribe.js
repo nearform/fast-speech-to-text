@@ -1,7 +1,7 @@
-import fs from "node:fs/promises";
+import { readFileSync } from "fs";
 import { SpeechClient } from "@google-cloud/speech";
 
-export class GoogleSpeechToText {
+export class TranscriptionClient {
   /**
    * @constructor
    * @param {SpeechClient} client
@@ -10,13 +10,12 @@ export class GoogleSpeechToText {
     this.client = client;
   }
 
-  static async create() {
-    const credentialsFile = process.env["GCLOUD_CREDENTIALS"];
-    const credentials = await fs
-      .readFile(credentialsFile, "utf-8")
-      .then((s) => JSON.parse(s));
+  static init() {
+    const credentials = JSON.parse(
+      readFileSync(process.env["GCLOUD_CREDENTIALS"])
+    );
     const client = new SpeechClient({ credentials });
-    return new GoogleSpeechToText(client);
+    return new TranscriptionClient(client);
   }
 
   createTranscription(languageCode) {

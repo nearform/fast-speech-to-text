@@ -3,10 +3,12 @@ import fastify from "fastify";
 import cors from "@fastify/cors";
 import fastifyWebsocket from "@fastify/websocket";
 
-import { GoogleSpeechToText } from "./lib/speech-to-text.js";
-import { GoogleTranslate } from "./lib/translate.js";
+import { RealtimeDatabaseClient } from "./lib/rtdb.js";
+import { TranscriptionClient } from "./lib/transcribe.js";
+import { TranslationClient } from "./lib/translate.js";
 
-import googleRealtime from "./lib/google-realtime.js";
+import socket from "./lib/socket.js";
+import room from "./lib/room.js";
 
 const app = fastify({ logger: true });
 app.register(cors, {
@@ -19,10 +21,14 @@ app.get("/is-alive", async () => {
   return { msg: "Is Alive!", now };
 });
 
-app.register(googleRealtime, {
-  speechToText: await GoogleSpeechToText.create(),
-  translator: await GoogleTranslate.create(),
+const rtdbInstance = RealtimeDatabaseClient.init();
+
+app.register(socket, {
+  rtdb: rtdbInstance,
+  transcriber: TranscriptionClient.init(),
+  translator: TranslationClient.init(),
 });
+app.register(room, { rtdb: rtdbInstance });
 
 try {
   await app.listen({ port: 1234 });

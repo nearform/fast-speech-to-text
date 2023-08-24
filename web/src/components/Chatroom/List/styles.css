@@ -1,0 +1,49 @@
+.chatroom-list-container {
+  column-gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  width: 85%;
+  justify-content: center;
+  /* align-items: center; */
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.chatroom-list-item:not(.create) {
+  display: flex;
+  flex-direction: row;
+  background-color: #eee;
+  border-radius: 3px;
+  color: black;
+  max-width: 45%;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.chatroom-list-item:not(.create) .chatroom-info {
+  /* something here */
+}
+.chatroom-list-item:not(.create) .chatroom-info h1 {
+  font-size: 1.25em;
+  text-align: left;
+}
+.chatroom-list-item:not(.create) .chatroom-info p {
+  font-size: 1em;
+  color: #777;
+  text-align: left;
+}
+.chatroom-list-item:not(.create) .chatroom-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatroom-list-item:not(.create) .chatroom-cta svg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  font-size: 1.5em;
+}
