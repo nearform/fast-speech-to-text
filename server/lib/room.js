@@ -1,11 +1,10 @@
 import S from "fluent-json-schema";
 import { v4 as uuid } from "uuid";
 
-// import { RealtimeDatabaseClient } from "./rtdb";
+import { RealtimeDatabaseClient } from "./rtdb";
 
 const eventSchema = {
   body: S.object()
-    // .prop("index", S.number().required())
     .prop(
       "message",
       S.object()
@@ -40,9 +39,9 @@ const roomSchema = {
  * @param {Function} done
  */
 export default (instance, opts, done) => {
-  // if (!opts.rtdb || !(opts.rtdb instanceof RealtimeDatabaseClient)) {
-  //   throw new Error("rtdb must be provided");
-  // }
+  if (!opts.rtdb || !(opts.rtdb instanceof RealtimeDatabaseClient)) {
+    throw new Error("rtdb must be provided");
+  }
 
   instance.decorate("rtdb", opts.rtdb);
 
