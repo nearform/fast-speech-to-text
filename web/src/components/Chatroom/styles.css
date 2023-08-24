@@ -144,9 +144,11 @@
   flex-direction: row;
   align-items: center;
   column-gap: 10px;
+  text-align: left;
 }
 .chat-event-wrapper.message.own-event .message-event .message-event-content {
   flex-direction: row-reverse;
+  text-align: right;
 }
 .chat-event-wrapper.message .message-event .message-event-content .message-event-content-replay {
   height: 2em;
