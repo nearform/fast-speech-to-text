@@ -82,9 +82,10 @@ export default (instance, opts, done) => {
         .prop("name", S.string().required()),
     },
     async ({ body, params }) => {
-      // if host leaves, nuke the room
+      // if host leaves, nuke the room & any events
       if (body.role === "host") {
         instance.rtdb.delete(`rooms`, params.id);
+        instance.rtdb.delete('events', params.id)
       } else {
         // clear the guest info
         instance.rtdb.update(`rooms/${params.id}/guest`, {});
