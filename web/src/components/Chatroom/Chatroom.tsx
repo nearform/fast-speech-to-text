@@ -32,17 +32,17 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   const [room, setRoom] = useRecoilState(activeRoom);
   const isHost = useRecoilValue(userIsHost);
 
-  const [{ chatroom, loading }] = useChatroom({ rtdbRef, roomId: room?.id });
+  const [{ chatroom, error, loading }] = useChatroom({ rtdbRef, roomId: room?.id });
 
   useEffect(() => {
-    if (!chatroom) {
+    if (error || !chatroom) {
       setRoom(null);
     }
-  }, [chatroom]);
+  }, [chatroom, error]);
 
   const handleLeave = async () => {
     try {
-      await axios.put(`${import.meta.env['VITE_API_HOST']}/room/${room.id}/leave`, {
+      await axios.put(`api/room/${room?.id}/leave`, {
         role: isHost ? 'host' : 'guest',
         name: userName
       });

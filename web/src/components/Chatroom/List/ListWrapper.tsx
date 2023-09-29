@@ -9,7 +9,7 @@ import { useChatrooms } from '@/hooks/useChatrooms';
 
 import { Chatroom } from '@/lib/types/chatroom';
 
-import { user as userAtom, activeRoom as activeRoomAtom } from '@/state';
+import { activeRoom as activeRoomAtom, user as userAtom } from '@/state';
 
 import { CreateRoom } from './CreateRoom';
 import { ListItem } from './ListItem';
@@ -21,14 +21,14 @@ type ChatroomListProps = {
 };
 
 export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
-  const { chatrooms, loading } = useChatrooms({ rtdbRef });
+  const { chatrooms, error, loading } = useChatrooms({ rtdbRef });
 
   const setActiveRoom = useSetRecoilState(activeRoomAtom);
   const user = useRecoilValue(userAtom);
 
   const handleJoin = async (room: Chatroom) => {
     try {
-      await axios.put(`${import.meta.env['VITE_API_HOST']}/room/${room.id}/join`, user);
+      await axios.put(`api/room/${room.id}/join`, user);
       setActiveRoom(room);
     } catch (error) {
       console.error('Failed to join room', error);
@@ -47,6 +47,7 @@ export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
         </>
       )}
       {!loading && !chatrooms.length && <p>No chatrooms found. Why not create one?</p>}
+      {error && <p>{error}</p>}
     </div>
   );
 };

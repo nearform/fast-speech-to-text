@@ -7,8 +7,8 @@ import languagesLookup from '@/lib/data/languages.json';
 
 import { LanguageCode } from '@/lib/types/language';
 
-import { user as userAtom, activeRoom as activeRoomAtom } from '@/state';
 import { Chatroom } from '@/lib/types/chatroom';
+import { activeRoom as activeRoomAtom, user as userAtom } from '@/state';
 
 const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] = Object.entries<{
   name: string;
@@ -27,7 +27,7 @@ export const CreateRoom = () => {
 
     try {
       const { data: room } = await axios.post<Chatroom>(
-        `${import.meta.env['VITE_API_HOST']}/room`,
+        `api/room`,
         {
           name: roomName,
           host: user

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, Database } from 'firebase/database';
+import { Database, getDatabase } from 'firebase/database';
 
 import { RecoilRoot } from 'recoil';
 

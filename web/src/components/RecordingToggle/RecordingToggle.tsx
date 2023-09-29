@@ -1,5 +1,5 @@
-import { FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import { FiMic as StartRecording, FiMicOff as StopRecording } from 'react-icons/fi';
 

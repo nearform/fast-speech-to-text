@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Database, ref, onValue } from 'firebase/database';
+import { Database, onValue, ref } from 'firebase/database';
 
 import { Chatroom } from '@/lib/types/chatroom';
 
@@ -29,7 +29,10 @@ export const useChatroom = ({
         setLoading(false);
         setChatroom(data.val() as Chatroom);
       },
-      (error) => setError(error.message)
+      (error) => {
+        setLoading(false);
+        setError(error.message)
+      }
     );
 
     return unsubscribe;
