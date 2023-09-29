@@ -2,24 +2,26 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon | npx pino-pretty",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server",
+    "test": "NODE_OPTIONS=--loader=testdouble c8 tap --no-cov",
+    "lint": "eslint . --ext .js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fastify/cors": "^8.3.0",
+    "@fastify/static": "^6.11.2",
     "@fastify/websocket": "^8.2.0",
     "@google-cloud/speech": "^5.6.0",
     "@google-cloud/translate": "^8.0.0",
-    "dotenv": "^16.3.1",
-    "fastify": "^4.21.0",
+    "desm": "^1.3.0",
+    "env-schema": "^5.2.0",
+    "fastify": "^4.23.2",
     "fluent-json-schema": "^4.1.1",
-    "openai": "^3.3.0",
     "pino": "^8.14.2",
     "uuid": "^9.0.0"
   },

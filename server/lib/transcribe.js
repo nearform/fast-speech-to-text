@@ -1,5 +1,5 @@
-import { readFileSync } from "fs";
 import { SpeechClient } from "@google-cloud/speech";
+import { readFileSync } from "fs";
 
 export class TranscriptionClient {
   /**
@@ -12,7 +12,7 @@ export class TranscriptionClient {
 
   static init() {
     const credentials = JSON.parse(
-      readFileSync(process.env["GCLOUD_CREDENTIALS"])
+      readFileSync(process.env.GCLOUD_CREDENTIALS)
     );
     const client = new SpeechClient({ credentials });
     return new TranscriptionClient(client);

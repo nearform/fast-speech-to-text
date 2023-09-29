@@ -13,7 +13,7 @@ export class TranslationClient {
   static init() {
     try {
       const credentials = JSON.parse(
-        readFileSync(process.env["GCLOUD_CREDENTIALS"])
+        readFileSync(process.env.GCLOUD_CREDENTIALS)
       );
       const client = new v2.Translate({ credentials });
 

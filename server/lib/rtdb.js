@@ -16,11 +16,11 @@ export class RealtimeDatabaseClient {
 
   static init() {
     const firebaseConfig = {
-      apiKey: process.env["FIREBASE_API_KEY"],
-      appId: process.env["FIREBASE_APP_ID"],
-      authDomain: process.env["FIREBASE_AUTH_DOMAIN"],
-      databaseURL: process.env["FIREBASE_RTDB_URL"],
-      projectId: process.env["FIREBASE_PROJECT_ID"],
+      apiKey: process.env.FIREBASE_API_KEY,
+      appId: process.env.FIREBASE_APP_ID,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      databaseURL: process.env.FIREBASE_RTDB_URL,
+      projectId: process.env.FIREBASE_PROJECT_ID,
     };
 
     try {

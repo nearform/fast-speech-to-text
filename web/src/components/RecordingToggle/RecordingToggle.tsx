@@ -25,9 +25,7 @@ type RecordProps = {
   user: string;
 };
 
-const WS_URL = new URL(import.meta.env['VITE_API_HOST']);
-WS_URL.protocol = 'ws';
-WS_URL.pathname = '/transcribe';
+const WS_URL = 'ws://0.0.0.0:3000/transcribe';
 
 export const RecordingToggle: FC<RecordProps> = ({
   chunkDuration = 1000,
@@ -43,7 +41,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 
   const recorder = useRef<MediaRecorder>();
 
-  const { readyState, sendMessage, getWebSocket } = useWebSocket(WS_URL.toString(), {
+  const { readyState, sendMessage, getWebSocket } = useWebSocket(WS_URL, {
     onOpen: () => {
       console.log('WebSocket connection open');
       if (bufferedMessages.length) {
