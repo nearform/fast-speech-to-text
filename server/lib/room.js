@@ -1,8 +1,6 @@
 import S from "fluent-json-schema";
 import { v4 as uuid } from "uuid";
 
-// import { RealtimeDatabaseClient } from "./rtdb";
-
 const eventSchema = {
   body: S.object()
     .prop(
