@@ -1,4 +1,4 @@
-.recording-toggle {
+/* .recording-toggle {
   height: 2.5em;
   width: 2.5em;
   border-radius: 2.5em;
@@ -15,7 +15,7 @@
 
   background-color: #2936af;
   transition: linear all 0.2s;
-}
+} */
 
 .recording-toggle:hover {
   background-color: #18259e;

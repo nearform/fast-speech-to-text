@@ -1,5 +1,5 @@
-import { FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import { FiMic as StartRecording, FiMicOff as StopRecording } from 'react-icons/fi';
 
@@ -16,11 +16,13 @@ import { stringToBuffer } from '@/lib/utils';
 import './styles.css';
 
 type RecordProps = {
-  chunkDuration: number;
+  chunkDuration?: number;
   langFrom: LanguageCode;
   langTo: LanguageCode;
   onRecordingToggle: () => void;
   onTranscriptionChange: (transcription: TranscriptionData) => void;
+  roomId: string;
+  user: string;
 };
 
 const WS_URL = new URL(import.meta.env['VITE_API_HOST']);
@@ -28,11 +30,13 @@ WS_URL.protocol = 'ws';
 WS_URL.pathname = '/transcribe';
 
 export const RecordingToggle: FC<RecordProps> = ({
-  chunkDuration,
+  chunkDuration = 1000,
   langFrom,
   langTo,
   onRecordingToggle,
-  onTranscriptionChange
+  onTranscriptionChange,
+  roomId,
+  user
 }) => {
   const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>([]);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -62,7 +66,7 @@ export const RecordingToggle: FC<RecordProps> = ({
     },
     shouldReconnect: () => true,
     reconnectAttempts: 5,
-    reconnectInterval: (attemptNo: number) => 500 * attemptNo,
+    reconnectInterval: (attemptNo: number) => 1000 * attemptNo,
     onReconnectStop: (attempts) =>
       console.warn(`Giving up re-establishing connection after ${attempts} attempts`)
   });
@@ -91,20 +95,34 @@ export const RecordingToggle: FC<RecordProps> = ({
         mimeType: 'audio/webm; codecs=opus'
       });
       recorder.current.ondataavailable = async (event: BlobEvent) => {
-        const outgoingMessage = new Uint8Array(event.data.size + 22);
-
         const stateFlag = recorder.current?.state === 'recording' ? 1 : 2;
-        outgoingMessage[0] = stateFlag;
 
         // add the languages used, padding to a fixed length so that
         // we can reliably receive & parse them on the back end
         // N.B - if this padding changes or is removed, the back end
         //       will need updating to match
         const langsBuffer = stringToBuffer(`${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`);
-        outgoingMessage.set(langsBuffer, 1);
 
-        const recordingBuffer = await event.data.arrayBuffer();
-        outgoingMessage.set(new Uint8Array(recordingBuffer), 1 + langsBuffer.length);
+        // add the room ID & user name so that we can store the
+        // message after transcribing & translating
+        const roomIdBuffer = stringToBuffer(roomId);
+        const roomIdOffset = 1 + langsBuffer.byteLength;
+
+        const userBuffer = stringToBuffer(user.padEnd(25, '*'));
+        const userOffset = roomIdOffset + roomIdBuffer.length;
+
+        const recordingBuffer = new Uint8Array(await event.data.arrayBuffer());
+        const recordingOffset = userOffset + userBuffer.length;
+
+        const totalMessageSize = recordingOffset + recordingBuffer.length;
+
+        const outgoingMessage = new Uint8Array(totalMessageSize);
+
+        outgoingMessage[0] = stateFlag;
+        outgoingMessage.set(langsBuffer, 1);
+        outgoingMessage.set(roomIdBuffer, roomIdOffset);
+        outgoingMessage.set(userBuffer, userOffset);
+        outgoingMessage.set(recordingBuffer, recordingOffset);
 
         // convert to ArrayBuffer prior to sending
         const binaryMsg: ArrayBuffer =

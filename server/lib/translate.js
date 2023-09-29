@@ -1,7 +1,7 @@
 import { v2 } from "@google-cloud/translate";
 import { readFileSync } from "fs";
 
-export class GoogleTranslate {
+export class TranslationClient {
   /**
    * @constructor
    * @param {v2.Translate} client
@@ -10,14 +10,14 @@ export class GoogleTranslate {
     this.client = client;
   }
 
-  static async create() {
+  static init() {
     try {
       const credentials = JSON.parse(
         readFileSync(process.env["GCLOUD_CREDENTIALS"])
       );
       const client = new v2.Translate({ credentials });
 
-      return new GoogleTranslate(client);
+      return new TranslationClient(client);
     } catch (error) {
       throw new Error("Failed to initialise translator");
     }
