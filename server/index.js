@@ -1,14 +1,14 @@
-import fastifyStatic from "@fastify/static";
-import fastifyWebsocket from "@fastify/websocket";
-import { join } from 'desm';
-import fastify from "fastify";
+import fastifyStatic from '@fastify/static'
+import fastifyWebsocket from '@fastify/websocket'
+import { join } from 'desm'
+import fastify from 'fastify'
 
-import { RealtimeDatabaseClient } from "./lib/rtdb.js";
-import { TranscriptionClient } from "./lib/transcribe.js";
-import { TranslationClient } from "./lib/translate.js";
+import { RealtimeDatabaseClient } from './lib/rtdb.js'
+import { TranscriptionClient } from './lib/transcribe.js'
+import { TranslationClient } from './lib/translate.js'
 
-import room from "./lib/room.js";
-import socket from "./lib/socket.js";
+import room from './lib/room.js'
+import socket from './lib/socket.js'
 
 function buildServer(config) {
   const opts = {
@@ -32,22 +32,29 @@ function buildServer(config) {
     etag: false
   })
 
-  app.register(fastifyWebsocket);
+  app.setNotFoundHandler((req, reply) => {
+    if (req.headers.accept.includes('text/html')) {
+      return reply.sendFile('index.html')
+    }
+    reply.status(404).send()
+  })
 
-  app.get("/is-alive", async () => {
-    const now = new Date().toISOString();
-    return { msg: "Is Alive!", now };
-  });
+  app.register(fastifyWebsocket)
 
-  const rtdbInstance = RealtimeDatabaseClient.init();
+  app.get('/is-alive', async () => {
+    const now = new Date().toISOString()
+    return { msg: 'Is Alive!', now }
+  })
+
+  const rtdbInstance = RealtimeDatabaseClient.init()
 
   app.register(socket, {
     rtdb: rtdbInstance,
     transcriber: TranscriptionClient.init(),
-    translator: TranslationClient.init(),
-  });
+    translator: TranslationClient.init()
+  })
 
-  app.register(room, { rtdb: rtdbInstance });
+  app.register(room, { rtdb: rtdbInstance })
 
   app.log.info('Server is starting up!')
 
