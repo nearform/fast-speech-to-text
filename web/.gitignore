@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 /build
-/.svelte-kit
 /package
 .env
 vite.config.js.timestamp-*
