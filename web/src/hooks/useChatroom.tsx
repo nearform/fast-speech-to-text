@@ -31,7 +31,7 @@ export const useChatroom = ({
       },
       (error) => {
         setLoading(false);
-        setError(error.message)
+        setError(error.message);
       }
     );
 

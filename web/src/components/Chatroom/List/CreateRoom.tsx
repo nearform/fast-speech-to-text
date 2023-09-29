@@ -26,13 +26,10 @@ export const CreateRoom = () => {
     setCreating(true);
 
     try {
-      const { data: room } = await axios.post<Chatroom>(
-        `api/room`,
-        {
-          name: roomName,
-          host: user
-        }
-      );
+      const { data: room } = await axios.post<Chatroom>(`api/room`, {
+        name: roomName,
+        host: user
+      });
 
       setActiveRoom(room);
     } catch (error) {

@@ -27,7 +27,7 @@ export const useChatrooms = ({ rtdbRef }: UseChatroomArgs): UseChatroomData => {
       },
       (error) => {
         setLoading(false);
-        setError(error.message)
+        setError(error.message);
       }
     );
 

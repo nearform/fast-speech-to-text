@@ -41,8 +41,9 @@ export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
       {!loading && (
         <>
           <CreateRoom />
-          {Object.values(user).every(Boolean) && chatrooms.map((room) => (
-            <ListItem key={`room-${room.id}`} room={room} onClick={handleJoin} />
+          {Object.values(user).every(Boolean) &&
+            chatrooms.map((room) => (
+              <ListItem key={`room-${room.id}`} room={room} onClick={handleJoin} />
             ))}
         </>
       )}
