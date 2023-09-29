@@ -1,3 +1,3 @@
-import languagesLookup from '@/lib/data/languages.json';
+import languagesLookup from '@/lib/data/languages.json'
 
-export type LanguageCode = keyof typeof languagesLookup;
+export type LanguageCode = keyof typeof languagesLookup

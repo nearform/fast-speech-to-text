@@ -1,67 +1,72 @@
-import { FC, useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { FC, useEffect, useState } from 'react'
+import { useRecoilState, useRecoilValue } from 'recoil'
 
-import axios from 'axios';
+import axios from 'axios'
 
-import { Database } from 'firebase/database';
+import { Database } from 'firebase/database'
 
-import { FiLogOut as Leave } from 'react-icons/fi';
+import { FiLogOut as Leave } from 'react-icons/fi'
 
-import { RecordingToggle } from '@/components/RecordingToggle';
+import { RecordingToggle } from '@/components/RecordingToggle'
 
-import { useChatroom } from '@/hooks/useChatroom';
+import { useChatroom } from '@/hooks/useChatroom'
 
-import { TranscriptionData } from '@/lib/types/transcription';
+import { TranscriptionData } from '@/lib/types/transcription'
 
-import { activeRoom, user, userIsHost } from '@/state';
+import { activeRoom, user, userIsHost } from '@/state'
 
-import { ChatEvents } from './ConversationEvents';
-import { ListWrapper } from './List';
+import { ChatEvents } from './ConversationEvents'
+import { ListWrapper } from './List'
 
-import './styles.css';
+import './styles.css'
 
 type ChatWrapperProps = {
-  rtdbRef: Database;
-};
+  rtdbRef: Database
+}
 
 export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
-  const [recording, setRecording] = useState<boolean>(false);
-  const [transcribedText, setTranscribedText] = useState<string>('');
+  const [recording, setRecording] = useState<boolean>(false)
+  const [transcribedText, setTranscribedText] = useState<string>('')
 
-  const { name: userName } = useRecoilValue(user);
-  const [room, setRoom] = useRecoilState(activeRoom);
-  const isHost = useRecoilValue(userIsHost);
+  const { name: userName } = useRecoilValue(user)
+  const [room, setRoom] = useRecoilState(activeRoom)
+  const isHost = useRecoilValue(userIsHost)
 
-  const [{ chatroom, error, loading }] = useChatroom({ rtdbRef, roomId: room?.id });
+  const [{ chatroom, error, loading }] = useChatroom({
+    rtdbRef,
+    roomId: room?.id
+  })
 
   useEffect(() => {
     if (error || !chatroom) {
-      setRoom(null);
+      setRoom(null)
     }
-  }, [chatroom, error]);
+  }, [chatroom, error])
 
   const handleLeave = async () => {
     try {
       await axios.put(`api/room/${room?.id}/leave`, {
         role: isHost ? 'host' : 'guest',
         name: userName
-      });
-      setRoom(null);
+      })
+      setRoom(null)
     } catch (error) {
-      console.error('Failed to leave room', error);
+      console.error('Failed to leave room', error)
     }
-  };
+  }
 
-  const handleTranscriptionOutput = (transcription: TranscriptionData): void => {
+  const handleTranscriptionOutput = (
+    transcription: TranscriptionData
+  ): void => {
     const {
       transcription: { original }
-    } = transcription;
+    } = transcription
 
-    setTranscribedText(original.text);
-  };
+    setTranscribedText(original.text)
+  }
 
   if (loading) {
-    return <p>Loading, please wait...</p>;
+    return <p>Loading, please wait...</p>
   }
 
   return room ? (
@@ -83,7 +88,9 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
         />
 
         <RecordingToggle
-          langFrom={isHost ? chatroom?.host.language : chatroom?.guest?.language}
+          langFrom={
+            isHost ? chatroom?.host.language : chatroom?.guest?.language
+          }
           langTo={
             (isHost ? chatroom?.guest?.language : chatroom?.host.language) ||
             chatroom?.host.language
@@ -91,9 +98,9 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
           onTranscriptionChange={handleTranscriptionOutput}
           onRecordingToggle={() => {
             if (recording) {
-              setTranscribedText('');
+              setTranscribedText('')
             }
-            setRecording(!recording);
+            setRecording(!recording)
           }}
           roomId={room?.id}
           user={userName}
@@ -102,7 +109,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
     </div>
   ) : (
     <ListWrapper rtdbRef={rtdbRef} />
-  );
-};
+  )
+}
 
-ChatWrapper.displayName = 'ChatWrapper';
+ChatWrapper.displayName = 'ChatWrapper'

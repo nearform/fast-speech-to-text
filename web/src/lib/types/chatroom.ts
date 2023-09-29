@@ -1,27 +1,27 @@
-import { LanguageCode } from './language';
+import { LanguageCode } from './language'
 
 export type Chatroom = {
   guest?: {
-    name: string;
-    language: LanguageCode;
-  };
+    name: string
+    language: LanguageCode
+  }
   host: {
-    name: string;
-    language: LanguageCode;
-  };
-  name: string;
-  id: string; // UUID generated server-side
-};
+    name: string
+    language: LanguageCode
+  }
+  name: string
+  id: string // UUID generated server-side
+}
 
 export type ConversationEvent = {
-  type: 'message' | 'entryExit';
-  user: string;
+  type: 'message' | 'entryExit'
+  user: string
   message?: {
     // langFrom?: string;
     // langTo?: string;
-    original: string;
-    translated?: string;
-  };
-  event: 'joined' | 'left';
-  timestamp: number;
-};
+    original: string
+    translated?: string
+  }
+  event: 'joined' | 'left'
+  timestamp: number
+}

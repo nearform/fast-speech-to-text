@@ -1,13 +1,13 @@
-import { FC } from 'react';
+import { FC } from 'react'
 
-import { FiChevronRight as Join } from 'react-icons/fi';
+import { FiChevronRight as Join } from 'react-icons/fi'
 
-import { Chatroom } from '@/lib/types/chatroom';
+import { Chatroom } from '@/lib/types/chatroom'
 
 type ListItemProps = {
-  room: Chatroom;
-  onClick: (room: Chatroom) => void;
-};
+  room: Chatroom
+  onClick: (room: Chatroom) => void
+}
 
 export const ListItem: FC<ListItemProps> = ({ room, onClick }) => {
   return (
@@ -22,5 +22,5 @@ export const ListItem: FC<ListItemProps> = ({ room, onClick }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}

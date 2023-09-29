@@ -1,26 +1,32 @@
-import { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC } from 'react'
 
-import languagesLookup from '@/lib/data/languages.json';
+import languagesLookup from '@/lib/data/languages.json'
 
-import { LanguageCode } from '@/lib/types/language';
+import { LanguageCode } from '@/lib/types/language'
 
-const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] = Object.entries<{
-  name: string;
-  flag: string;
-}>(languagesLookup);
+const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
+  Object.entries<{
+    name: string
+    flag: string
+  }>(languagesLookup)
 
-import './styles.css';
+import './styles.css'
 
 type LanguageSelectProps = {
-  keyPrefix: string;
-  label?: string;
-  onChange: (lang: LanguageCode) => void;
-  value: LanguageCode;
-};
+  keyPrefix: string
+  label?: string
+  onChange: (lang: LanguageCode) => void
+  value: LanguageCode
+}
 
-export const LanguageSelect: FC<LanguageSelectProps> = ({ keyPrefix, label, onChange, value }) => {
+export const LanguageSelect: FC<LanguageSelectProps> = ({
+  keyPrefix,
+  label,
+  onChange,
+  value
+}) => {
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) =>
-    onChange(event.target.value as LanguageCode);
+    onChange(event.target.value as LanguageCode)
 
   return (
     <div className="language-container">
@@ -40,5 +46,5 @@ export const LanguageSelect: FC<LanguageSelectProps> = ({ keyPrefix, label, onCh
         </select>
       </label>
     </div>
-  );
-};
+  )
+}

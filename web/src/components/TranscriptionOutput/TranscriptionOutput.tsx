@@ -1,16 +1,16 @@
-import { FC } from 'react';
+import { FC } from 'react'
 
-import LANGUAGES from '@/lib/data/languages.json';
-import { LanguageCode } from '@/lib/types/language';
+import LANGUAGES from '@/lib/data/languages.json'
+import { LanguageCode } from '@/lib/types/language'
 
-import './styles.css';
+import './styles.css'
 
 type TranscriptionOutputProps = {
-  langFrom: LanguageCode;
-  langTo: LanguageCode;
-  transcribed: string;
-  translated: string;
-};
+  langFrom: LanguageCode
+  langTo: LanguageCode
+  transcribed: string
+  translated: string
+}
 
 export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
   langFrom,
@@ -18,8 +18,8 @@ export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
   transcribed,
   translated
 }) => {
-  const sourceLanguage = LANGUAGES[langFrom];
-  const outputLanguage = LANGUAGES[langTo];
+  const sourceLanguage = LANGUAGES[langFrom]
+  const outputLanguage = LANGUAGES[langTo]
 
   return (
     <>
@@ -35,14 +35,15 @@ export const TranscriptionOutput: FC<TranscriptionOutputProps> = ({
       {translated && (
         <div className="output to">
           <p className="output-title">
-            <span className="output-flag">{outputLanguage.flag}</span> Translated to:
+            <span className="output-flag">{outputLanguage.flag}</span>{' '}
+            Translated to:
             <span className="output-language">{outputLanguage.name}</span>
           </p>
           <p className="output-text">{translated}</p>
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-TranscriptionOutput.displayName = 'TranscriptionOutput';
+TranscriptionOutput.displayName = 'TranscriptionOutput'

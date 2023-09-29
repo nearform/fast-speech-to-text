@@ -1,11 +1,11 @@
-import { FC } from 'react';
-import { FiAlignRight as Menu } from 'react-icons/fi';
+import { FC } from 'react'
+import { FiAlignRight as Menu } from 'react-icons/fi'
 
-import './styles.css';
+import './styles.css'
 
 type HeaderProps = {
-  onToggleMenu: () => void;
-};
+  onToggleMenu: () => void
+}
 
 export const Header: FC<HeaderProps> = ({ onToggleMenu }) => (
   <div className="header-bar">
@@ -17,6 +17,6 @@ export const Header: FC<HeaderProps> = ({ onToggleMenu }) => (
       <Menu />
     </div>
   </div>
-);
+)
 
-Header.displayName = 'Header';
+Header.displayName = 'Header'

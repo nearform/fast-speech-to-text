@@ -1,22 +1,22 @@
-import { FC } from 'react';
+import { FC } from 'react'
 
-import { FiRepeat as Switch } from 'react-icons/fi';
+import { FiRepeat as Switch } from 'react-icons/fi'
 
-import { LanguageCode } from '@/lib/types/language';
+import { LanguageCode } from '@/lib/types/language'
 
-import { LanguageSelect } from './LanguageSelect';
+import { LanguageSelect } from './LanguageSelect'
 
-import './styles.css';
+import './styles.css'
 
 type LanguageSelectorsProps = {
-  inputLang: LanguageCode;
-  outputLang: LanguageCode;
-  onInputChange: (code: LanguageCode) => void;
-  onOutputChange: (code: LanguageCode) => void;
-  onSwitchClick: () => void;
-};
+  inputLang: LanguageCode
+  outputLang: LanguageCode
+  onInputChange: (code: LanguageCode) => void
+  onOutputChange: (code: LanguageCode) => void
+  onSwitchClick: () => void
+}
 
-const DEFAULT_LANG: LanguageCode = 'en';
+const DEFAULT_LANG: LanguageCode = 'en'
 
 export const LanguageSelectors: FC<LanguageSelectorsProps> = ({
   inputLang = DEFAULT_LANG,
@@ -43,5 +43,5 @@ export const LanguageSelectors: FC<LanguageSelectorsProps> = ({
         value={outputLang}
       />
     </div>
-  );
-};
+  )
+}
