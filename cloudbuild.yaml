@@ -6,10 +6,10 @@ steps:
     entrypoint: 'npm'
     args: ['run', 'build']
     env:
-    - '_VITE_FIREBASE_API_KEY: $$FIREBASE_API_KEY'
-    - '_VITE_FIREBASE_APP_ID: $$FIREBASE_APP_ID'
-    - '_VITE_FIREBASE_RTDB_URL: https://hub-playground-default-rtdb.europe-west1.firebasedatabase.app'
-    - '_VITE_FIREBASE_PROJECT_ID: hub-playground'
+    - 'VITE_FIREBASE_API_KEY: $$FIREBASE_API_KEY'
+    - 'VITE_FIREBASE_APP_ID: $$FIREBASE_APP_ID'
+    - 'VITE_FIREBASE_RTDB_URL: https://hub-playground-default-rtdb.europe-west1.firebasedatabase.app'
+    - 'VITE_FIREBASE_PROJECT_ID: hub-playground'
   - name: 'node'
     entrypoint: 'npm'
     args: ['test']
