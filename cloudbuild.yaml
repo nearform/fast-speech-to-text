@@ -1,0 +1,22 @@
+steps:
+  - name: 'node'
+    entrypoint: 'npm'
+    args: ['install']
+  - name: 'node'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    automapSubstitutions: true
+  - name: 'node'
+    entrypoint: 'npm'
+    args: ['test']
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_API_KEY/versions/latest
+      env: 'FIREBASE_API_KEY'
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_APP_ID/versions/latest
+      env: 'FIREBASE_APP_ID'
+substitutions:
+  _VITE_FIREBASE_API_KEY: $$FIREBASE_API_KEY
+  _VITE_FIREBASE_APP_ID: $$FIREBASE_APP_ID
+  _VITE_FIREBASE_RTDB_URL: "https://hub-playground-default-rtdb.europe-west1.firebasedatabase.app"
+  _VITE_FIREBASE_PROJECT_ID: "hub-playground"

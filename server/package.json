@@ -23,6 +23,7 @@
     "fastify": "^4.23.2",
     "fluent-json-schema": "^4.1.1",
     "pino": "^8.14.2",
+    "pino-pretty": "^10.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -30,7 +31,6 @@
     "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^8.28.0",
     "nodemon": "^3.0.1",
-    "pino-pretty": "^10.2.0",
     "typescript": "^5.0.0"
   }
 }

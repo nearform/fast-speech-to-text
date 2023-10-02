@@ -3,7 +3,6 @@ import envSchema from 'env-schema'
 import S from 'fluent-json-schema'
 
 const schema = S.object()
-  .prop('GCLOUD_CREDENTIALS', S.string().required())
   .prop('FIREBASE_API_KEY', S.string().required())
   .prop('FIREBASE_APP_ID', S.string().required())
   .prop('FIREBASE_AUTH_DOMAIN', S.string().required())

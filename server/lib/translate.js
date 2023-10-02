@@ -1,5 +1,5 @@
 import { v2 } from '@google-cloud/translate'
-import { readFileSync } from 'fs'
+// import { readFileSync } from 'fs'
 
 export class TranslationClient {
   /**
@@ -12,10 +12,7 @@ export class TranslationClient {
 
   static init() {
     try {
-      const credentials = JSON.parse(
-        readFileSync(process.env.GCLOUD_CREDENTIALS)
-      )
-      const client = new v2.Translate({ credentials })
+      const client = new v2.Translate()
 
       return new TranslationClient(client)
     } catch (error) {
