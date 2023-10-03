@@ -1,1 +1,1 @@
-export * from './ChunkSize';
+export * from './ChunkSize'

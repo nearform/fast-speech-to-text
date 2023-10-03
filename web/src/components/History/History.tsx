@@ -1,14 +1,14 @@
-import { FC } from 'react';
+import { FC } from 'react'
 
-import { TranslationResult } from '@/lib/types/transcription';
+import { TranslationResult } from '@/lib/types/transcription'
 
-import { HistoryItem } from './HistoryItem';
+import { HistoryItem } from './HistoryItem'
 
 type HistoryProps = {
-  phrases: TranslationResult[];
-};
+  phrases: TranslationResult[]
+}
 
-import './styles.css';
+import './styles.css'
 
 export const History: FC<HistoryProps> = ({ phrases }) => {
   return phrases.length ? (
@@ -23,7 +23,7 @@ export const History: FC<HistoryProps> = ({ phrases }) => {
         />
       ))}
     </div>
-  ) : null;
-};
+  ) : null
+}
 
-History.displayName = 'History';
+History.displayName = 'History'

@@ -1,2 +1,2 @@
-export type OutgoingMessage = string | ArrayBuffer;
-export type TextMessage = string;
+export type OutgoingMessage = string | ArrayBuffer
+export type TextMessage = string

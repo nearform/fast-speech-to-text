@@ -1,45 +1,43 @@
-import { ChangeEvent, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { ChangeEvent, useState } from 'react'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 
-import axios from 'axios';
+import axios from 'axios'
 
-import languagesLookup from '@/lib/data/languages.json';
+import languagesLookup from '@/lib/data/languages.json'
 
-import { LanguageCode } from '@/lib/types/language';
+import { LanguageCode } from '@/lib/types/language'
 
-import { Chatroom } from '@/lib/types/chatroom';
-import { activeRoom as activeRoomAtom, user as userAtom } from '@/state';
+import { Chatroom } from '@/lib/types/chatroom'
+import { activeRoom as activeRoomAtom, user as userAtom } from '@/state'
 
-const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] = Object.entries<{
-  name: string;
-  flag: string;
-}>(languagesLookup);
+const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
+  Object.entries<{
+    name: string
+    flag: string
+  }>(languagesLookup)
 
 export const CreateRoom = () => {
-  const [creating, setCreating] = useState<boolean>(false);
-  const [roomName, setRoomName] = useState<string>('');
+  const [creating, setCreating] = useState<boolean>(false)
+  const [roomName, setRoomName] = useState<string>('')
 
-  const [user, setUser] = useRecoilState(userAtom);
-  const setActiveRoom = useSetRecoilState(activeRoomAtom);
+  const [user, setUser] = useRecoilState(userAtom)
+  const setActiveRoom = useSetRecoilState(activeRoomAtom)
 
   const handleCreateRoom = async () => {
-    setCreating(true);
+    setCreating(true)
 
     try {
-      const { data: room } = await axios.post<Chatroom>(
-        `api/room`,
-        {
-          name: roomName,
-          host: user
-        }
-      );
+      const { data: room } = await axios.post<Chatroom>(`api/room`, {
+        name: roomName,
+        host: user
+      })
 
-      setActiveRoom(room);
+      setActiveRoom(room)
     } catch (error) {
-      console.error('Failed to create room', error);
+      console.error('Failed to create room', error)
     }
-    setCreating(false);
-  };
+    setCreating(false)
+  }
 
   return (
     <div className="chatroom-list-item create">
@@ -60,7 +58,7 @@ export const CreateRoom = () => {
           id="userLang"
           value={user.language}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            setUser({ ...user, language: e.target.value as LanguageCode });
+            setUser({ ...user, language: e.target.value as LanguageCode })
           }}
         >
           {AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
@@ -76,17 +74,24 @@ export const CreateRoom = () => {
             type="text"
             className="chatroom-create-input"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setRoomName(e.target.value);
+              setRoomName(e.target.value)
             }}
             value={roomName}
           />
-          <button className="chatroom-create-submit" onClick={handleCreateRoom} disabled={creating}>
+          <button
+            className="chatroom-create-submit"
+            onClick={handleCreateRoom}
+            disabled={creating}
+          >
             Create
           </button>
         </>
       ) : (
-        <p>Please provide your name & spoken language to create or join a chatroom</p>
+        <p>
+          Please provide your name & spoken language to create or join a
+          chatroom
+        </p>
       )}
     </div>
-  );
-};
+  )
+}

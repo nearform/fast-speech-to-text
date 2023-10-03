@@ -1,22 +1,16 @@
-import { initializeApp } from 'firebase/app';
-import { Database, getDatabase } from 'firebase/database';
+import { initializeApp } from 'firebase/app'
+import { Database, getDatabase } from 'firebase/database'
 
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot } from 'recoil'
 
-import { ChatWrapper as Chat, Header } from '@/components';
+import { ChatWrapper as Chat, Header } from '@/components'
 
-import './App.css';
+import './App.css'
+import { firebaseConfig } from './firebase'
 
-const firebaseConfig = {
-  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'],
-  appId: import.meta.env['VITE_FIREBASE_APP_ID'],
-  databaseURL: import.meta.env['VITE_FIREBASE_RTDB_URL'],
-  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID']
-};
+initializeApp(firebaseConfig)
 
-initializeApp(firebaseConfig);
-
-const db: Database = getDatabase();
+const db: Database = getDatabase()
 
 const App = () => {
   return (
@@ -26,9 +20,9 @@ const App = () => {
         <Chat rtdbRef={db} />
       </div>
     </RecoilRoot>
-  );
-};
+  )
+}
 
-App.displayName = 'App';
+App.displayName = 'App'
 
-export default App;
+export default App

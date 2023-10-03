@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp } from 'firebase/app'
 import {
   child,
   getDatabase,
@@ -6,30 +6,30 @@ import {
   ref,
   remove,
   set,
-  update,
-} from "firebase/database";
+  update
+} from 'firebase/database'
 
 export class RealtimeDatabaseClient {
   constructor(db) {
-    this.db = db;
+    this.db = db
   }
 
   static init() {
     const firebaseConfig = {
-      apiKey: process.env["FIREBASE_API_KEY"],
-      appId: process.env["FIREBASE_APP_ID"],
-      authDomain: process.env["FIREBASE_AUTH_DOMAIN"],
-      databaseURL: process.env["FIREBASE_RTDB_URL"],
-      projectId: process.env["FIREBASE_PROJECT_ID"],
-    };
+      apiKey: process.env.FIREBASE_API_KEY,
+      appId: process.env.FIREBASE_APP_ID,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      databaseURL: process.env.FIREBASE_RTDB_URL,
+      projectId: process.env.FIREBASE_PROJECT_ID
+    }
 
     try {
-      initializeApp(firebaseConfig);
+      initializeApp(firebaseConfig)
 
-      return new RealtimeDatabaseClient(getDatabase());
+      return new RealtimeDatabaseClient(getDatabase())
     } catch (error) {
-      console.error(error);
-      throw new Error("Failed to initialise realtime database");
+      console.error(error)
+      throw new Error('Failed to initialise realtime database')
     }
   }
 
@@ -41,10 +41,10 @@ export class RealtimeDatabaseClient {
    */
   delete(bucket, id) {
     if (!bucket || !id) {
-      throw new Error("bucket & id must be provided");
+      throw new Error('bucket & id must be provided')
     }
 
-    return remove(ref(this.db, `${bucket}/${id}`));
+    return remove(ref(this.db, `${bucket}/${id}`))
   }
 
   /**
@@ -55,12 +55,12 @@ export class RealtimeDatabaseClient {
    */
   async insert(target, value) {
     if (!target || (value !== null && !value)) {
-      throw new Error("target & value must be provided");
+      throw new Error('target & value must be provided')
     }
 
-    set(ref(this.db, target), value);
+    set(ref(this.db, target), value)
 
-    return value;
+    return value
   }
 
   /**
@@ -71,12 +71,12 @@ export class RealtimeDatabaseClient {
    */
   async push(bucket, value) {
     if (!bucket || !value) {
-      throw new Error("bucket & value must be provided");
+      throw new Error('bucket & value must be provided')
     }
 
-    push(child(ref(this.db), bucket), value);
+    push(child(ref(this.db), bucket), value)
 
-    return value;
+    return value
   }
 
   /**
@@ -87,9 +87,9 @@ export class RealtimeDatabaseClient {
    */
   async update(target, value) {
     if (!target || !value) {
-      throw new Error("target & value must be provided");
+      throw new Error('target & value must be provided')
     }
 
-    update(ref(this.db), { [target]: value });
+    update(ref(this.db), { [target]: value })
   }
 }

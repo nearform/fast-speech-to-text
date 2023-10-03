@@ -1,17 +1,22 @@
-import { FC } from 'react';
+import { FC } from 'react'
 
-import { TranslationResult } from '@/lib/types/transcription';
+import { TranslationResult } from '@/lib/types/transcription'
 
-import languagesLookup from '@/lib/data/languages.json';
-import { say } from '@/lib/utils';
+import languagesLookup from '@/lib/data/languages.json'
+import { say } from '@/lib/utils'
 
-type HistoryItemProps = TranslationResult;
+type HistoryItemProps = TranslationResult
 
-export const HistoryItem: FC<HistoryItemProps> = ({ languages, phrase, translated, timestamp }) => {
-  const timestampAsString = new Date(timestamp).toLocaleString();
+export const HistoryItem: FC<HistoryItemProps> = ({
+  languages,
+  phrase,
+  translated,
+  timestamp
+}) => {
+  const timestampAsString = new Date(timestamp).toLocaleString()
 
-  const sourceLanguage = languagesLookup[languages.from];
-  const targetLanguage = languagesLookup[languages.to];
+  const sourceLanguage = languagesLookup[languages.from]
+  const targetLanguage = languagesLookup[languages.to]
   return (
     <div
       className="history-item"
@@ -30,7 +35,7 @@ export const HistoryItem: FC<HistoryItemProps> = ({ languages, phrase, translate
       {translated && <p className="translated">{translated}</p>}
       <p className="timestamp">{timestampAsString}</p>
     </div>
-  );
-};
+  )
+}
 
-HistoryItem.displayName = 'HistoryItem';
+HistoryItem.displayName = 'HistoryItem'

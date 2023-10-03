@@ -1,17 +1,17 @@
-import { FC } from 'react';
-import Slider from 'rc-slider';
+import { FC } from 'react'
+import Slider from 'rc-slider'
 
-import 'rc-slider/assets/index.css';
-import './styles.css';
+import 'rc-slider/assets/index.css'
+import './styles.css'
 
 type ChunkSizeProps = {
-  chunkSize: number;
-  max?: number;
-  min?: number;
+  chunkSize: number
+  max?: number
+  min?: number
   // it'll never be an array, but has to accept them to satisfy the prop type on Slider component
-  onChange: (newSize: number | number[]) => void;
-  step?: number;
-};
+  onChange: (newSize: number | number[]) => void
+  step?: number
+}
 
 export const ChunkSize: FC<ChunkSizeProps> = ({
   chunkSize,
@@ -54,7 +54,7 @@ export const ChunkSize: FC<ChunkSizeProps> = ({
         />
       </div>
     </>
-  );
-};
+  )
+}
 
-ChunkSize.displayName = 'ChunkSize';
+ChunkSize.displayName = 'ChunkSize'

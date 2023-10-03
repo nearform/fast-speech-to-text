@@ -1,33 +1,35 @@
-import { FC, useState } from 'react';
+import { FC, useState } from 'react'
 
-import { FiVolume2 as Play, FiVolumeX as Stop } from 'react-icons/fi';
+import { FiVolume2 as Play, FiVolumeX as Stop } from 'react-icons/fi'
 
-import { differenceInDays, format } from 'date-fns';
+import { differenceInDays, format } from 'date-fns'
 
 type MessageEventProps = {
-  message: string;
-  timestamp: number;
-};
+  message: string
+  timestamp: number
+}
 
 export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
-  const [playing, setPlaying] = useState<boolean>(false);
-  const formatToUse = differenceInDays(timestamp, Date.now()) ? 'dd/MM/yyyy HH:mm' : 'HH:mm';
+  const [playing, setPlaying] = useState<boolean>(false)
+  const formatToUse = differenceInDays(timestamp, Date.now())
+    ? 'dd/MM/yyyy HH:mm'
+    : 'HH:mm'
 
   const handleReplay = () => {
-    setPlaying(!playing);
+    setPlaying(!playing)
 
     if (!playing) {
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = window.navigator.language;
+      const utterance = new SpeechSynthesisUtterance(message)
+      utterance.lang = window.navigator.language
       utterance.addEventListener('end', () => {
-        setPlaying(false);
-      });
+        setPlaying(false)
+      })
 
-      speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance)
     } else {
-      speechSynthesis.cancel();
+      speechSynthesis.cancel()
     }
-  };
+  }
 
   return (
     <div className="message-event">
@@ -37,7 +39,9 @@ export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
           {playing ? <Stop /> : <Play />}
         </button>
       </div>
-      <p className="message-event-timestamp">{format(new Date(timestamp), formatToUse)}</p>
+      <p className="message-event-timestamp">
+        {format(new Date(timestamp), formatToUse)}
+      </p>
     </div>
-  );
-};
+  )
+}

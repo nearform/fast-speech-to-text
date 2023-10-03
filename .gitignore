@@ -1,2 +1,10 @@
 node_modules
-.env
+.eslintcache
+
+# JetBrains IDEs
+.idea
+# Visual Studio Code
+.vscode
+
+# OS X
+.DS_Store
