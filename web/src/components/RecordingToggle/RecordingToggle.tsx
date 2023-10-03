@@ -31,7 +31,7 @@ type RecordProps = {
 const WS_URL = `${
   isProtocolSecure(window.location.protocol) ? 'wss' : 'ws'
 }://${
-  import.meta.env.mode === 'production'
+  import.meta.env.MODE === 'production'
     ? window.location.hostname
     : '0.0.0.0:8080'
 }/transcribe`
