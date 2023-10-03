@@ -9,7 +9,7 @@ const schema = S.object()
   .prop('FIREBASE_RTDB_URL', S.string().required())
   .prop('FIREBASE_PROJECT_ID', S.string().required())
   .prop('HOST', S.string().default('0.0.0.0'))
-  .prop('PORT', S.number().default(3000))
+  .prop('PORT', S.number().default(8080))
   .prop('LOG_LEVEL', S.string().default('info'))
   .prop('PRETTY_PRINT', S.string().default(false))
 

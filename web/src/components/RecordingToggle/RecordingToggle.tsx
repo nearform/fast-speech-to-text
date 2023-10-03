@@ -30,7 +30,7 @@ type RecordProps = {
 
 const WS_URL = `${
   isProtocolSecure(window.location.protocol) ? 'wss' : 'ws'
-}://0.0.0.0:3000/transcribe`
+}://0.0.0.0:8080/transcribe`
 
 export const RecordingToggle: FC<RecordProps> = ({
   chunkDuration = 1000,
