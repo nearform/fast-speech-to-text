@@ -8,16 +8,7 @@ The basic idea being validated here is that streaming speech to text can allow u
 
 ### Environment Variables
 
-You will need the following environment variables set - use `.env` files in the `web/` and `server/` directories to set them:
-
-```
-# web/.env
-
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_APP_ID=
-VITE_FIREBASE_RTDB_URL=
-VITE_FIREBASE_PROJECT_ID=
-```
+You will need the following environment variables set - use `.env` files in the `server/` directory to set them:
 
 ```
 # server/.env

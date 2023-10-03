@@ -17,7 +17,7 @@ export default ({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: 'http://0.0.0.0:3000',
+          target: 'http://0.0.0.0:8080',
           secure: false
         }
       }
