@@ -12,7 +12,7 @@
     "test:dev": "vitest"
   },
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^1.5.1",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "firebase": "^10.2.0",
