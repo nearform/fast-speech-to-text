@@ -80,3 +80,6 @@ export const sayAndStore = (
 }
 
 export const readBackAndStore = debounce(sayAndStore, 500)
+
+export const isProtocolSecure = (protocol: string) =>
+  protocol && protocol.startsWith('https')

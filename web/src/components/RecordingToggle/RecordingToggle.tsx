@@ -14,7 +14,7 @@ import { LanguageCode } from '@/lib/types/language'
 import { OutgoingMessage } from '@/lib/types/message'
 import { TranscriptionData } from '@/lib/types/transcription'
 
-import { stringToBuffer } from '@/lib/utils'
+import { isProtocolSecure, stringToBuffer } from '@/lib/utils'
 
 import './styles.css'
 
@@ -28,7 +28,9 @@ type RecordProps = {
   user: string
 }
 
-const WS_URL = 'ws://0.0.0.0:3000/transcribe'
+const WS_URL = `${
+  isProtocolSecure(window.location.protocol) ? 'wss' : 'ws'
+}://0.0.0.0:3000/transcribe`
 
 export const RecordingToggle: FC<RecordProps> = ({
   chunkDuration = 1000,
