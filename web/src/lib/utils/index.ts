@@ -95,14 +95,15 @@ export const convertTranscriptionMessageToBinaryMessage = (
   // we can reliably receive & parse them on the back end
   // N.B - if this padding changes or is removed, the back end
   //       will need updating to match
-  const langsBuffer = stringToBuffer(
+  const languagesBuffer = stringToBuffer(
     `${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`
   )
+  const languagesOffset = 1
 
   // add the room ID & user name so that we can store the
   // message after translating
   const roomIdBuffer = stringToBuffer(roomId)
-  const roomIdOffset = 1 + langsBuffer.byteLength
+  const roomIdOffset = 1 + languagesBuffer.byteLength
 
   const userBuffer = stringToBuffer(userName.padEnd(25, '*'))
   const userOffset = roomIdOffset + roomIdBuffer.length
@@ -114,8 +115,7 @@ export const convertTranscriptionMessageToBinaryMessage = (
 
   const outgoingMessage = new Uint8Array(totalMessageSize)
 
-  outgoingMessage[0] = 1 // message type
-  outgoingMessage.set(langsBuffer, 1)
+  outgoingMessage.set(languagesBuffer, languagesOffset)
   outgoingMessage.set(roomIdBuffer, roomIdOffset)
   outgoingMessage.set(userBuffer, userOffset)
   outgoingMessage.set(transcribedTextBuffer, transcribedTextOffset)

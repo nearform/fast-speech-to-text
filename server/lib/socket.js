@@ -1,5 +1,6 @@
 import { RealtimeDatabaseClient } from './rtdb.js'
 import { TranslationClient } from './translate.js'
+
 /**
  * @param {import('fastify').FastifyInstance} instance
  * @param {object} opts
@@ -44,9 +45,7 @@ function socket(instance, opts, done) {
     function deconstructMessage(buffer) {
       const decoder = new TextDecoder()
 
-      const stateCode = buffer[0] ?? -1
-
-      const langs = decoder
+      const languages = decoder
         .decode(buffer.subarray(1, 21))
         .replace(/\*/g, '')
         .split(':')
@@ -58,7 +57,7 @@ function socket(instance, opts, done) {
 
       const transcribedText = decoder.decode(buffer.subarray(83))
 
-      return [stateCode, langs[0], langs[1], roomId, sender, transcribedText]
+      return [languages[0], languages[1], roomId, sender, transcribedText]
     }
 
     async function translateText(text, targetLang) {
@@ -67,7 +66,7 @@ function socket(instance, opts, done) {
         ;[translated] = await instance.translator.translate(text, targetLang)
       } catch (error) {
         instance.log.error(error.message, 'Failed to generate translation')
-        translated = 'ERROR'
+        translated = `An error occured during translation. The original message was: ${text}`
       }
 
       return translated
@@ -76,84 +75,56 @@ function socket(instance, opts, done) {
     let message
 
     connection.socket.on('message', async rawData => {
-      const [
-        stateCode,
-        translateFrom,
-        translateTo,
-        roomId,
-        user,
-        transcribedText
-      ] = deconstructMessage(rawData)
+      const [translateFrom, translateTo, roomId, user, transcribedText] =
+        deconstructMessage(rawData)
 
-      switch (stateCode) {
-        case 0:
-          {
-            instance.log.info(
-              { text: transcribedText.toString('utf-8') },
-              'Got text message from client'
-            )
-            sendJson({ type: 'msg', msg: 'Connection established' })
+      instance.log.info(
+        { length: transcribedText.length },
+        'Got continuous message from client'
+      )
+      if (transcribedText) {
+        let translated = await translateText(transcribedText, translateTo)
+        // if the to & from languages are the same there's no point
+        // in translating them so just return the transcription
+        if (translateFrom !== translateTo) {
+          instance.log.info('Translating transcription into ' + translateTo)
+        }
+
+        const payload = {
+          original: {
+            text: transcribedText,
+            language: translateFrom
           }
-          break
-        case 1:
-          {
-            instance.log.info(
-              { length: transcribedText.length },
-              'Got continuous message from client'
-            )
-            if (transcribedText) {
-              let translated = await translateText(transcribedText, translateTo)
-              // if the to & from languages are the same there's no point
-              // in translating them so just return the transcription
-              if (translateFrom !== translateTo) {
-                instance.log.info(
-                  'Translating transcription into ' + translateTo
-                )
-              }
+        }
 
-              const payload = {
-                original: {
-                  text: transcribedText,
-                  language: translateFrom
-                }
-              }
-
-              if (translated) {
-                payload.translated = {
-                  text: translated,
-                  language: translateTo
-                }
-              }
-
-              message = {
-                message: {
-                  langFrom: translateFrom,
-                  langTo: translateTo,
-                  original: transcribedText,
-                  translated
-                },
-                timestamp: Date.now(),
-                type: 'message',
-                user
-              }
-
-              instance.log.info('Translation finished')
-              instance.log.info(message, 'message')
-
-              instance.rtdb.push(`events/${roomId}`, message)
-
-              sendJson({
-                type: 'transcription',
-                transcription: payload
-              })
-            }
+        if (translated) {
+          payload.translated = {
+            text: translated,
+            language: translateTo
           }
-          break
-        default:
-          instance.log.warn(
-            { raw: rawData.toString('utf-8') },
-            'Got unknown message from client'
-          )
+        }
+
+        message = {
+          message: {
+            langFrom: translateFrom,
+            langTo: translateTo,
+            original: transcribedText,
+            translated
+          },
+          timestamp: Date.now(),
+          type: 'message',
+          user
+        }
+
+        instance.log.info('Translation finished')
+        instance.log.info(message, 'message')
+
+        instance.rtdb.push(`events/${roomId}`, message)
+
+        sendJson({
+          type: 'transcription',
+          transcription: payload
+        })
       }
     })
 
