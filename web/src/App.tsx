@@ -15,9 +15,14 @@ const db: Database = getDatabase()
 const App = () => {
   return (
     <RecoilRoot>
-      <Header onToggleMenu={() => {}} />
-      <div className="container">
-        <Chat rtdbRef={db} />
+      <div
+        id="primary-container"
+        className="flex flex-col p-4 space-y-4 h-screen relative container"
+      >
+        <Header onToggleMenu={() => {}} />
+        <div className="container">
+          <Chat rtdbRef={db} />
+        </div>
       </div>
     </RecoilRoot>
   )
