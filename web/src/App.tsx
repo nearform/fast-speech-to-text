@@ -19,7 +19,7 @@ const App = () => {
         id="primary-container"
         className="flex flex-col p-4 space-y-4 h-screen relative container"
       >
-        <Header onToggleMenu={() => {}} />
+        <Header />
         <div className="container">
           <Chat rtdbRef={db} />
         </div>
