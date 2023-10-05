@@ -1,190 +1,134 @@
 import clsx from 'clsx'
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 
 import {
   FiMic as StartRecording,
   FiMicOff as StopRecording
 } from 'react-icons/fi'
 
-import useWebSocket, { ReadyState } from 'react-use-websocket'
-
-import _set from 'lodash.set'
-
 import { LanguageCode } from '@/lib/types/language'
-import { OutgoingMessage } from '@/lib/types/message'
 import { TranscriptionData } from '@/lib/types/transcription'
-
-import { isProtocolSecure, stringToBuffer } from '@/lib/utils'
 
 import './styles.css'
 
 type RecordProps = {
-  chunkDuration?: number
   langFrom: LanguageCode
-  langTo: LanguageCode
-  onRecordingToggle: () => void
+  onRecordingToggle: (
+    transcription: TranscriptionData,
+    isRecording: boolean
+  ) => void
   onTranscriptionChange: (transcription: TranscriptionData) => void
-  roomId: string
-  user: string
 }
 
-const WS_URL = `${
-  isProtocolSecure(window.location.protocol) ? 'wss' : 'ws'
-}://${
-  import.meta.env.MODE === 'production'
-    ? window.location.hostname
-    : '0.0.0.0:8080'
-}/transcribe`
+const RECOGNITION_ERRORS = ['no-speech', 'audio-capture', 'not-allowed']
+
+const SpeechRecognition =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+const SpeechRecognitionEvent =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).SpeechRecognitionEvent ||
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).webkitSpeechRecognitionEvent
+
+const recognition = new SpeechRecognition()
 
 export const RecordingToggle: FC<RecordProps> = ({
-  chunkDuration = 1000,
   langFrom,
-  langTo,
   onRecordingToggle,
-  onTranscriptionChange,
-  roomId,
-  user
+  onTranscriptionChange
 }) => {
-  const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>(
-    []
-  )
+  const [finalTranscript, setFinalTranscript] = useState<TranscriptionData>()
   const [isRecording, setIsRecording] = useState<boolean>(false)
-
-  const recorder = useRef<MediaRecorder>()
-
-  const { readyState, sendMessage, getWebSocket } = useWebSocket(WS_URL, {
-    onOpen: () => {
-      console.log('WebSocket connection open')
-      if (bufferedMessages.length) {
-        console.log(`${bufferedMessages.length} messages buffered, sending now`)
-        for (const message of bufferedMessages) {
-          sendMessage(message)
-        }
-      }
-    },
-    onError: (event: Event) => {
-      console.error('Error emitted from WebSocket', event)
-    },
-    onClose: () => {
-      console.log('WebSocket connection closed')
-    },
-    onMessage: (event: MessageEvent) => {
-      const decoder = new TextDecoder()
-      const message = JSON.parse(decoder.decode(event.data as ArrayBuffer))
-      onTranscriptionChange(message)
-    },
-    shouldReconnect: () => true,
-    reconnectAttempts: 5,
-    reconnectInterval: (attemptNo: number) => 1000 * attemptNo,
-    onReconnectStop: attempts =>
-      console.warn(
-        `Giving up re-establishing connection after ${attempts} attempts`
-      )
-  })
+  const [isIgnoreRecognitionOnEnd, setIsIgnoreRecognitionOnEnd] =
+    useState<boolean>(false)
 
   useEffect(() => {
-    return () => {
-      getWebSocket()?.close()
+    if (isRecording || finalTranscript) {
+      onRecordingToggle(finalTranscript, isRecording)
     }
-  }, [])
-  useEffect(() => {
-    if (getWebSocket()) {
-      _set(getWebSocket(), 'binaryType', 'arraybuffer')
+
+    if (!isRecording) {
+      onTranscriptionChange(null)
     }
-  }, [getWebSocket()])
+  }, [finalTranscript, isRecording])
 
-  const toggleRecording = async () => {
-    onRecordingToggle()
-    const recording = recorder.current?.state === 'recording'
+  const recognitionOnErrorHandler = (event: typeof SpeechRecognitionEvent) => {
+    if (RECOGNITION_ERRORS.findIndex(e => e == event.error) >= 0) {
+      setIsIgnoreRecognitionOnEnd(true)
+    }
+  }
 
-    if ((recorder.current && !recording) || !recorder.current) {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: { sampleRate: 48000 },
-        video: false
-      })
-      recorder.current = new MediaRecorder(mediaStream, {
-        mimeType: 'audio/webm; codecs=opus'
-      })
-      recorder.current.ondataavailable = async (event: BlobEvent) => {
-        const stateFlag = recorder.current?.state === 'recording' ? 1 : 2
+  const recognitionOnEndHandler = () => {
+    if (isIgnoreRecognitionOnEnd) {
+      return
+    }
+    console.log('Speech recognition service finished listening')
+    setIsRecording(false)
+  }
 
-        // add the languages used, padding to a fixed length so that
-        // we can reliably receive & parse them on the back end
-        // N.B - if this padding changes or is removed, the back end
-        //       will need updating to match
-        const langsBuffer = stringToBuffer(
-          `${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`
-        )
+  const recognitionOnStartHandler = () => {
+    setIsRecording(true)
+  }
 
-        // add the room ID & user name so that we can store the
-        // message after transcribing & translating
-        const roomIdBuffer = stringToBuffer(roomId)
-        const roomIdOffset = 1 + langsBuffer.byteLength
+  const recognitionOnResultHandler = (event: typeof SpeechRecognitionEvent) => {
+    let interimTranscript = ''
 
-        const userBuffer = stringToBuffer(user.padEnd(25, '*'))
-        const userOffset = roomIdOffset + roomIdBuffer.length
+    if (typeof event.results == 'undefined') {
+      recognition.onend = null
+      recognition.stop()
+      return
+    }
 
-        const recordingBuffer = new Uint8Array(await event.data.arrayBuffer())
-        const recordingOffset = userOffset + userBuffer.length
-
-        const totalMessageSize = recordingOffset + recordingBuffer.length
-
-        const outgoingMessage = new Uint8Array(totalMessageSize)
-
-        outgoingMessage[0] = stateFlag
-        outgoingMessage.set(langsBuffer, 1)
-        outgoingMessage.set(roomIdBuffer, roomIdOffset)
-        outgoingMessage.set(userBuffer, userOffset)
-        outgoingMessage.set(recordingBuffer, recordingOffset)
-
-        // convert to ArrayBuffer prior to sending
-        const binaryMsg: ArrayBuffer =
-          typeof outgoingMessage === 'string'
-            ? stringToBuffer(outgoingMessage)
-            : outgoingMessage
-
-        if (readyState === ReadyState.CONNECTING) {
-          if (!bufferedMessages.includes(binaryMsg)) {
-            console.debug(
-              'WebSocket not yet connected, adding message to buffer to send later'
-            )
-            setBufferedMessages(prev => [...prev, binaryMsg])
-          }
-        } else if (readyState === ReadyState.OPEN) {
-          console.debug('WebSocket connection active, sending message')
-          sendMessage(binaryMsg)
-        } else {
-          console.warn(
-            'WebSocket not in a ready state, message will not be sent.'
-          )
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        const finalTranscriptionResult: TranscriptionData = {
+          type: 'transcription',
+          transcription: {
+            text: event.results[i][0].transcript,
+            language: langFrom
+          },
+          isFinal: true
         }
+
+        setFinalTranscript(finalTranscriptionResult)
+        onTranscriptionChange(finalTranscriptionResult)
+      } else {
+        interimTranscript += event.results[i][0].transcript
+        onTranscriptionChange({
+          type: 'transcription',
+          transcription: { text: interimTranscript, language: langFrom },
+          isFinal: false
+        })
       }
+    }
+  }
 
-      recorder.current.onerror = (event: Event) => {
-        console.error('Error occured with recording', event)
-      }
+  recognition.continuous = true
+  recognition.interimResults = true
+  recognition.lang = langFrom
+  recognition.onstart = recognitionOnStartHandler
+  recognition.onerror = recognitionOnErrorHandler
+  recognition.onend = recognitionOnEndHandler
+  recognition.onresult = recognitionOnResultHandler
 
-      recorder.current.start(chunkDuration)
-      setIsRecording(true)
-    } else if (recorder.current && recording) {
-      setIsRecording(false)
-      recorder.current.stop()
-      recorder.current.stream
-        .getTracks()
-        .forEach((track: MediaStreamTrack) => track.stop())
-
-      // clear the ref to force re-instantiation if/when user attempts
-      // to record again
-      recorder.current = undefined
+  const toggleRecognition = (recognition: typeof SpeechRecognition) => {
+    if (isRecording) {
+      recognition.stop()
+    } else {
+      recognition.start()
+      setIsIgnoreRecognitionOnEnd(false)
     }
   }
 
   return (
-    <button
-      className={clsx('recording-toggle', { active: isRecording })}
-      onClick={toggleRecording}
-    >
-      {isRecording ? <StopRecording /> : <StartRecording />}
-    </button>
+    <>
+      <button
+        className={clsx('recognizing-toggle', { active: isRecording })}
+        onClick={() => toggleRecognition(recognition)}
+      >
+        {isRecording ? <StopRecording /> : <StartRecording />}
+      </button>
+    </>
   )
 }

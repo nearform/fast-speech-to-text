@@ -6,12 +6,20 @@ import axios from 'axios'
 import { Database } from 'firebase/database'
 
 import { FiLogOut as Leave } from 'react-icons/fi'
+import useWebSocket, { ReadyState } from 'react-use-websocket'
+
+import _set from 'lodash.set'
 
 import { RecordingToggle } from '@/components/RecordingToggle'
 
 import { useChatroom } from '@/hooks/useChatroom'
 
+import { OutgoingMessage } from '@/lib/types/message'
 import { TranscriptionData } from '@/lib/types/transcription'
+import {
+  convertTranscriptionMessageToBinaryMessage,
+  isProtocolSecure
+} from '@/lib/utils'
 
 import { activeRoom, user, userIsHost } from '@/state'
 
@@ -24,8 +32,18 @@ type ChatWrapperProps = {
   rtdbRef: Database
 }
 
+const WS_URL = `${
+  isProtocolSecure(window.location.protocol) ? 'wss' : 'ws'
+}://${
+  import.meta.env.MODE === 'production'
+    ? window.location.hostname
+    : '0.0.0.0:8080'
+}/translate`
+
 export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
-  const [recording, setRecording] = useState<boolean>(false)
+  const [bufferedMessages, setBufferedMessages] = useState<OutgoingMessage[]>(
+    []
+  )
   const [transcribedText, setTranscribedText] = useState<string>('')
 
   const { name: userName } = useRecoilValue(user)
@@ -37,11 +55,53 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
     roomId: room?.id
   })
 
+  const { readyState, sendMessage, getWebSocket } = useWebSocket(WS_URL, {
+    onOpen: () => {
+      console.log('WebSocket connection open')
+      if (bufferedMessages.length) {
+        console.log(`${bufferedMessages.length} messages buffered, sending now`)
+        for (const message of bufferedMessages) {
+          sendMessage(message)
+        }
+      }
+    },
+    onError: (event: Event) => {
+      console.error('Error emitted from WebSocket', event)
+    },
+    onClose: () => {
+      console.log('WebSocket connection closed')
+    },
+    onMessage: (event: MessageEvent) => {
+      const decoder = new TextDecoder()
+      const message = JSON.parse(decoder.decode(event.data as ArrayBuffer))
+      handleTranscriptionOutput(message)
+    },
+    shouldReconnect: () => true,
+    reconnectAttempts: 5,
+    reconnectInterval: (attemptNo: number) => 1000 * attemptNo,
+    onReconnectStop: attempts =>
+      console.warn(
+        `Giving up re-establishing connection after ${attempts} attempts`
+      )
+  })
+
   useEffect(() => {
     if (error || !chatroom) {
       setRoom(null)
     }
   }, [chatroom, error])
+
+  useEffect(() => {
+    return () => {
+      getWebSocket()?.close()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (getWebSocket()) {
+      _set(getWebSocket(), 'binaryType', 'arraybuffer')
+    }
+  }, [getWebSocket()])
 
   const handleLeave = async () => {
     try {
@@ -58,11 +118,58 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   const handleTranscriptionOutput = (
     transcription: TranscriptionData
   ): void => {
-    const {
-      transcription: { original }
-    } = transcription
+    if (!transcription) {
+      setTranscribedText('')
+    } else {
+      const {
+        transcription: { text }
+      } = transcription
 
-    setTranscribedText(original.text)
+      setTranscribedText(text)
+    }
+  }
+
+  const handleRecordingToggle = (
+    transcription: TranscriptionData,
+    isRecording: boolean
+  ): void => {
+    if (!isRecording && transcription) {
+      const {
+        transcription: { text }
+      } = transcription
+
+      const langFrom = isHost
+        ? chatroom?.host.language
+        : chatroom?.guest?.language
+
+      const langTo =
+        (isHost ? chatroom?.guest?.language : chatroom?.host?.language) ||
+        chatroom?.host.language
+
+      const binaryMsg = convertTranscriptionMessageToBinaryMessage(
+        langFrom,
+        langTo,
+        room?.id,
+        userName,
+        text
+      )
+
+      if (readyState === ReadyState.CONNECTING) {
+        if (!bufferedMessages.includes(binaryMsg)) {
+          console.debug(
+            'WebSocket not yet connected, adding message to buffer to send later'
+          )
+          setBufferedMessages(prev => [...prev, binaryMsg])
+        }
+      } else if (readyState === ReadyState.OPEN) {
+        console.debug('WebSocket connection active, sending message')
+        sendMessage(binaryMsg)
+      } else {
+        console.warn(
+          'WebSocket not in a ready state, message will not be sent.'
+        )
+      }
+    }
   }
 
   if (loading) {
@@ -79,8 +186,8 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
       </div>
       <ChatEvents rtdbRef={rtdbRef} />
       <div className="chat-footer">
-        <input
-          type="text"
+        <textarea
+          rows={3}
           className="transcribed-text"
           disabled
           placeholder="Hit record & start talking to see a live transcription here.  Stop recording to send your message"
@@ -91,19 +198,8 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
           langFrom={
             isHost ? chatroom?.host.language : chatroom?.guest?.language
           }
-          langTo={
-            (isHost ? chatroom?.guest?.language : chatroom?.host.language) ||
-            chatroom?.host.language
-          } // chatroom.guest gets set when guest joins, so fallback to host if no guest
           onTranscriptionChange={handleTranscriptionOutput}
-          onRecordingToggle={() => {
-            if (recording) {
-              setTranscribedText('')
-            }
-            setRecording(!recording)
-          }}
-          roomId={room?.id}
-          user={userName}
+          onRecordingToggle={handleRecordingToggle}
         />
       </div>
     </div>

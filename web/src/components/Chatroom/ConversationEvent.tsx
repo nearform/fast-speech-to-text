@@ -35,6 +35,11 @@ export const ConversationEvent: FC<ConversationEventProps> = ({
               : event.message?.translated || event.message?.original
           }
           timestamp={event.timestamp}
+          language={
+            sentByUser
+              ? event.message?.langFrom
+              : event.message?.langTo || event.message?.langFrom
+          }
         />
       )}
     </div>

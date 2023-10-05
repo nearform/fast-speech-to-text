@@ -60,7 +60,7 @@
   border-radius: 3px 0px 0px 3px;
 }
 
-.chat-container .chat-footer input {
+.chat-container .chat-footer textarea {
   width: 95%;
   border: transparent;
   background-color: white;
