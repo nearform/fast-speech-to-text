@@ -21,16 +21,6 @@ type RecordProps = {
 }
 
 const RECOGNITION_ERRORS = ['no-speech', 'audio-capture', 'not-allowed']
-
-const SpeechRecognition =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-const SpeechRecognitionEvent =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).SpeechRecognitionEvent ||
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).webkitSpeechRecognitionEvent
-
 const recognition = new SpeechRecognition()
 
 export const RecordingToggle: FC<RecordProps> = ({
@@ -53,7 +43,9 @@ export const RecordingToggle: FC<RecordProps> = ({
     }
   }, [finalTranscript, isRecording])
 
-  const recognitionOnErrorHandler = (event: typeof SpeechRecognitionEvent) => {
+  const recognitionOnErrorHandler = (event: SpeechRecognitionErrorEvent) => {
+    console.error(`Speech recognition error detected: ${event.error}`)
+    console.error(`Additional information: ${event.message}`)
     if (RECOGNITION_ERRORS.findIndex(e => e == event.error) >= 0) {
       setIsIgnoreRecognitionOnEnd(true)
     }
@@ -71,7 +63,7 @@ export const RecordingToggle: FC<RecordProps> = ({
     setIsRecording(true)
   }
 
-  const recognitionOnResultHandler = (event: typeof SpeechRecognitionEvent) => {
+  const recognitionOnResultHandler = (event: SpeechRecognitionEvent) => {
     let interimTranscript = ''
 
     if (typeof event.results == 'undefined') {
@@ -112,7 +104,7 @@ export const RecordingToggle: FC<RecordProps> = ({
   recognition.onend = recognitionOnEndHandler
   recognition.onresult = recognitionOnResultHandler
 
-  const toggleRecognition = (recognition: typeof SpeechRecognition) => {
+  const toggleRecognition = (recognition: SpeechRecognition) => {
     if (isRecording) {
       recognition.stop()
     } else {
