@@ -4,6 +4,9 @@ Repo containing experiments/explorations/proofs-of-concept for fast speech to te
 
 The basic idea being validated here is that streaming speech to text can allow us to create a speech-to-speech bot that responds more naturally, because it transcribes the input as it arrives.
 
+> [!NOTE]
+> The project currently properly runs in Chrome and other Webkit based browsers.
+
 ## Running things
 
 ### Pre-requisites

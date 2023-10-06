@@ -21,7 +21,9 @@ type RecordProps = {
 }
 
 const RECOGNITION_ERRORS = ['no-speech', 'audio-capture', 'not-allowed']
-const recognition = new SpeechRecognition()
+const recognition = window.SpeechRecognition
+  ? new window.SpeechRecognition()
+  : new window.webkitSpeechRecognition()
 
 export const RecordingToggle: FC<RecordProps> = ({
   langFrom,
