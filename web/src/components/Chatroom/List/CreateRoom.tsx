@@ -67,31 +67,31 @@ export const CreateRoom = () => {
             </option>
           ))}
         </select>
+        {user.name && user.language ? (
+          <>
+            <input
+              type="text"
+              className="chatroom-create-input my-[20px]"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setRoomName(e.target.value)
+              }}
+              value={roomName}
+            />
+            <button
+              className="chatroom-create-submit bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded max-w-xs mx-auto"
+              onClick={handleCreateRoom}
+              disabled={creating}
+            >
+              Create
+            </button>
+          </>
+        ) : (
+          <p>
+            Please provide your name & spoken language to create or join a
+            chatroom
+          </p>
+        )}
       </div>
-      {user.name && user.language ? (
-        <>
-          <input
-            type="text"
-            className="chatroom-create-input"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setRoomName(e.target.value)
-            }}
-            value={roomName}
-          />
-          <button
-            className="chatroom-create-submit"
-            onClick={handleCreateRoom}
-            disabled={creating}
-          >
-            Create
-          </button>
-        </>
-      ) : (
-        <p>
-          Please provide your name & spoken language to create or join a
-          chatroom
-        </p>
-      )}
     </div>
   )
 }

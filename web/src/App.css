@@ -1,12 +1,9 @@
 .container {
-  display: flex;
   width: clamp(200px, 1200px, 100vw);
   justify-content: center;
   align-items: center;
   flex-direction: column;
   font-family: sans-serif;
-  text-align: center;
-  margin-top: 15px;
-
+  text-align: center;  
   min-height: calc(100vh - 105px);
 }
