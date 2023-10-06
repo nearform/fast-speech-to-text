@@ -4,7 +4,6 @@ import { join } from 'desm'
 import fastify from 'fastify'
 
 import { RealtimeDatabaseClient } from './lib/rtdb.js'
-import { TranscriptionClient } from './lib/transcribe.js'
 import { TranslationClient } from './lib/translate.js'
 
 import room from './lib/room.js'
@@ -50,7 +49,6 @@ function buildServer(config) {
 
   app.register(socket, {
     rtdb: rtdbInstance,
-    transcriber: TranscriptionClient.init(),
     translator: TranslationClient.init()
   })
 

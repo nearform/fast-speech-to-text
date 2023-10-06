@@ -83,3 +83,48 @@ export const readBackAndStore = debounce(sayAndStore, 500)
 
 export const isProtocolSecure = (protocol: string) =>
   protocol && protocol.startsWith('https')
+
+export const convertTranscriptionMessageToBinaryMessage = (
+  langFrom: string,
+  langTo: string,
+  roomId: string,
+  userName: string,
+  text: string
+): ArrayBuffer => {
+  // add the languages used, padding to a fixed length so that
+  // we can reliably receive & parse them on the back end
+  // N.B - if this padding changes or is removed, the back end
+  //       will need updating to match
+  const languagesBuffer = stringToBuffer(
+    `${langFrom.padEnd(10, '*')}:${langTo.padEnd(10, '*')}`
+  )
+  const languagesOffset = 1
+
+  // add the room ID & user name so that we can store the
+  // message after translating
+  const roomIdBuffer = stringToBuffer(roomId)
+  const roomIdOffset = 1 + languagesBuffer.byteLength
+
+  const userBuffer = stringToBuffer(userName.padEnd(25, '*'))
+  const userOffset = roomIdOffset + roomIdBuffer.length
+
+  const transcribedTextBuffer = stringToBuffer(text)
+  const transcribedTextOffset = userOffset + userBuffer.length
+
+  const totalMessageSize = transcribedTextOffset + transcribedTextBuffer.length
+
+  const outgoingMessage = new Uint8Array(totalMessageSize)
+
+  outgoingMessage.set(languagesBuffer, languagesOffset)
+  outgoingMessage.set(roomIdBuffer, roomIdOffset)
+  outgoingMessage.set(userBuffer, userOffset)
+  outgoingMessage.set(transcribedTextBuffer, transcribedTextOffset)
+
+  // convert to ArrayBuffer prior to sending
+  const binaryMsg: ArrayBuffer =
+    typeof outgoingMessage === 'string'
+      ? stringToBuffer(outgoingMessage)
+      : outgoingMessage
+
+  return binaryMsg
+}

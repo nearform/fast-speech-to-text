@@ -4,7 +4,8 @@ type TranscribedText = { text: string; language: LanguageCode }
 
 export type TranscriptionData = {
   type: 'transcription'
-  transcription: { original: TranscribedText; translated?: TranscribedText }
+  transcription: TranscribedText
+  isFinal: boolean
 }
 
 export type TranslationResult = {

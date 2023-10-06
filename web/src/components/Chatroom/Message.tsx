@@ -7,9 +7,14 @@ import { differenceInDays, format } from 'date-fns'
 type MessageEventProps = {
   message: string
   timestamp: number
+  language: string
 }
 
-export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
+export const MessageEvent: FC<MessageEventProps> = ({
+  message,
+  timestamp,
+  language
+}) => {
   const [playing, setPlaying] = useState<boolean>(false)
   const formatToUse = differenceInDays(timestamp, Date.now())
     ? 'dd/MM/yyyy HH:mm'
@@ -20,7 +25,7 @@ export const MessageEvent: FC<MessageEventProps> = ({ message, timestamp }) => {
 
     if (!playing) {
       const utterance = new SpeechSynthesisUtterance(message)
-      utterance.lang = window.navigator.language
+      utterance.lang = language || window.navigator.language
       utterance.addEventListener('end', () => {
         setPlaying(false)
       })
