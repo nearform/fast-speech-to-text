@@ -15,12 +15,9 @@ const db: Database = getDatabase()
 const App = () => {
   return (
     <RecoilRoot>
-      <div
-        id="primary-container"
-        className="flex flex-col p-4 space-y-4 h-screen relative container"
-      >
+      <div id="primary-container" className="h-screen relative container">
         <Header />
-        <div className="container">
+        <div className="container py-8">
           <Chat rtdbRef={db} />
         </div>
       </div>
