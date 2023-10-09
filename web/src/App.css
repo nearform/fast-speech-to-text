@@ -1,9 +1,8 @@
 .container {
   width: clamp(200px, 1200px, 100vw);
   justify-content: center;
-  align-items: center;
+  align-items: start;
   flex-direction: column;
   font-family: sans-serif;
-  text-align: center;  
   min-height: calc(100vh - 105px);
 }

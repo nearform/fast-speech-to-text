@@ -1,14 +1,11 @@
-import { ChangeEvent, useState } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-
-import axios from 'axios'
+import { ChangeEvent } from 'react'
+import { useRecoilState } from 'recoil'
 
 import languagesLookup from '@/lib/data/languages.json'
 
 import { LanguageCode } from '@/lib/types/language'
 
-import { Chatroom } from '@/lib/types/chatroom'
-import { activeRoom as activeRoomAtom, user as userAtom } from '@/state'
+import { user as userAtom } from '@/state'
 
 const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
   Object.entries<{
@@ -17,42 +14,36 @@ const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
   }>(languagesLookup)
 
 export const CreateRoom = () => {
-  const [creating, setCreating] = useState<boolean>(false)
-  const [roomName, setRoomName] = useState<string>('')
-
   const [user, setUser] = useRecoilState(userAtom)
-  const setActiveRoom = useSetRecoilState(activeRoomAtom)
-
-  const handleCreateRoom = async () => {
-    setCreating(true)
-
-    try {
-      const { data: room } = await axios.post<Chatroom>(`api/room`, {
-        name: roomName,
-        host: user
-      })
-
-      setActiveRoom(room)
-    } catch (error) {
-      console.error('Failed to create room', error)
-    }
-    setCreating(false)
-  }
 
   return (
     <div className="chatroom-list-item create">
-      <div className="user-form">
-        <label htmlFor="userName">Your name</label>
+      <label
+        htmlFor="userName"
+        className="block text-sm font-normal leading-6 text-gray-900"
+      >
+        Your name
+      </label>
+      <div className="relative rounded-md shadow-sm">
         <input
           name="userName"
           type="text"
           id="userName"
+          className="block w-full bg-gray-50 rounded-md border-0 py-1 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setUser({ ...user, name: e.target.value })
           }
           value={user.name}
         />
-        <label htmlFor="userLang">Your language</label>
+      </div>
+
+      <label
+        htmlFor="userLang"
+        className="pt-2 block text-sm font-normal leading-6 text-gray-900"
+      >
+        Your language
+      </label>
+      <div className="relative rounded-md shadow-sm">
         <select
           name="userLang"
           id="userLang"
@@ -60,37 +51,14 @@ export const CreateRoom = () => {
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
             setUser({ ...user, language: e.target.value as LanguageCode })
           }}
+          className="align-middle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full py-1 px-2 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
         >
           {AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
-            <option key={`lang-${code}`} value={code}>
-              {name} {flag}
+            <option key={`lang-${code}`} value={code} className="align-middle">
+              {flag} {name}
             </option>
           ))}
         </select>
-        {user.name && user.language ? (
-          <>
-            <input
-              type="text"
-              className="chatroom-create-input my-[20px]"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setRoomName(e.target.value)
-              }}
-              value={roomName}
-            />
-            <button
-              className="chatroom-create-submit bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded max-w-xs mx-auto"
-              onClick={handleCreateRoom}
-              disabled={creating}
-            >
-              Create
-            </button>
-          </>
-        ) : (
-          <p>
-            Please provide your name & spoken language to create or join a
-            chatroom
-          </p>
-        )}
       </div>
     </div>
   )
