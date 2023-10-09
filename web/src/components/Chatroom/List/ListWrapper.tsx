@@ -36,7 +36,7 @@ export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
   }
 
   return (
-    <div className="chatroom-list-container mx-auto">
+    <div className="chatroom-list-container mx-auto flex justify-start h-full flex-nowrap">
       {loading && <p>Fetching chatrooms, please wait...</p>}
       {!loading && (
         <>
