@@ -46,7 +46,7 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
             <ConversationEvent
               event={event}
               key={`event-${idx + 1}`}
-              sentByUser={event.user === userName}
+              isSentByUser={event.user === userName}
               eventRef={idx === events.length - 1 ? eventRef : undefined}
             />
           ))
