@@ -1,6 +1,4 @@
 export * from './Chatroom'
 export * from './Header'
-export * from './History'
 export * from './RecordingToggle'
-export * from './Summary'
 export * from './TranscriptionOutput'
