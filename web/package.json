@@ -18,7 +18,7 @@
     "firebase": "^10.4.0",
     "lodash.debounce": "^4.0.8",
     "lodash.set": "^4.3.2",
-    "rc-slider": "^10.2.1",
+    "rc-slider": "^10.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.11",
@@ -33,7 +33,7 @@
     "@types/lodash.set": "^4.3.7",
     "@types/node": "^20.8.2",
     "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
+    "@types/react-dom": "^18.2.12",
     "@types/recoil": "^0.0.9",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -47,7 +47,7 @@
     "tailwindcss": "^3.3.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
+    "vite": "^4.4.11",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^0.34.3"
   }
