@@ -15,6 +15,11 @@ export default {
         '2xl': '1400px'
       }
     },
+    fontSize: {
+      medium: '1rem',
+      base: '0.875rem',
+      xs: '0.626rem'
+    },
     extend: {
       colors: {
         border: {
@@ -22,6 +27,7 @@ export default {
           subtle: 'hsl(var(--border-subtle))',
           'default-focus': 'hsl(var(--border-default-focus))',
           secondary: 'hsl(var(--border-secondary))',
+          success: 'hsl(var(--border-success))',
           hover: 'hsl(var(--border-hover))'
         },
         input: 'hsl(var(--input))',

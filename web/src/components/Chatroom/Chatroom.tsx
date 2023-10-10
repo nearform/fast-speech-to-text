@@ -5,7 +5,7 @@ import axios from 'axios'
 
 import { Database } from 'firebase/database'
 
-import { FiLogOut as Leave } from 'react-icons/fi'
+import { BiArrowBack } from 'react-icons/bi'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
 import _set from 'lodash.set'
@@ -177,30 +177,36 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   }
 
   return room ? (
-    <div className="chat-container">
-      <div className="chat-header">
-        <h2 className="chat-name">{chatroom?.name}</h2>
-        <button className="leave-chat" onClick={handleLeave}>
-          <Leave />
+    <div className="chat-container w-full h-full flex flex-col">
+      <div className="chat-header gap-6 flex flex-auto grow-0 shrink-1 pb-2">
+        <button
+          className="leave-chat text-medium border-none bg-transparent font-bold"
+          onClick={handleLeave}
+        >
+          <BiArrowBack className="inline-block align-middle mt-[-3px]" />
+          Back
         </button>
+        <h2 className="chat-name text-medium font-normal">{chatroom?.name}</h2>
       </div>
-      <ChatEvents rtdbRef={rtdbRef} />
-      <div className="chat-footer">
-        <textarea
-          rows={3}
-          className="transcribed-text"
-          disabled
-          placeholder="Hit record & start talking to see a live transcription here.  Stop recording to send your message"
-          value={transcribedText}
-        />
+      <div className="border h-full rounded-lg flex-1 flex flex-col">
+        <ChatEvents rtdbRef={rtdbRef} />
+        <div className="chat-footer flex gap-3">
+          <textarea
+            rows={3}
+            className="transcribed-text w-full bg-transparent border rounded-lg p-2 "
+            disabled
+            placeholder="Hit record & start talking to see a live transcription here.  Stop recording to send your message"
+            value={transcribedText}
+          />
 
-        <RecordingToggle
-          langFrom={
-            isHost ? chatroom?.host.language : chatroom?.guest?.language
-          }
-          onTranscriptionChange={handleTranscriptionOutput}
-          onRecordingToggle={handleRecordingToggle}
-        />
+          <RecordingToggle
+            langFrom={
+              isHost ? chatroom?.host.language : chatroom?.guest?.language
+            }
+            onTranscriptionChange={handleTranscriptionOutput}
+            onRecordingToggle={handleRecordingToggle}
+          />
+        </div>
       </div>
     </div>
   ) : (

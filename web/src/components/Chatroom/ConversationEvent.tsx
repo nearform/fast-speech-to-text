@@ -28,7 +28,7 @@ export const ConversationEvent: FC<ConversationEventProps> = ({
 
   return (
     <div
-      className={clsx('chat-event-wrapper', {
+      className={clsx('chat-event-wrapper my-3', {
         'entry-exit': isEventEntryExit,
         message: isEventMessage,
         'own-event': isSentByUser
@@ -39,6 +39,7 @@ export const ConversationEvent: FC<ConversationEventProps> = ({
         <EntryExitEvent event={event.event} user={event.user} />
       ) : (
         <MessageEvent
+          user={event.user}
           message={message}
           timestamp={event.timestamp}
           language={language}
