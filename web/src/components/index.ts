@@ -1,5 +1,4 @@
 export * from './Chatroom'
-export * from './ChunkSize'
 export * from './Header'
 export * from './History'
 export * from './RecordingToggle'
