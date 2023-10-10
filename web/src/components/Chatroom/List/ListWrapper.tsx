@@ -58,7 +58,7 @@ export const ListWrapper: FC<ChatroomListProps> = ({ rtdbRef }) => {
       {!loading && (
         <>
           <CreateRoom />
-          {user.name && chatrooms.length && (
+          {user.name && (
             <div className="mt-4 bg-slate-100 border-1 border-gray-400 rounded-lg flex flex-col justify-between gap-4 p-4 min-h-[579px]">
               <div className="flex flex-col gap-4 overflow-y-auto max-h-[458px]">
                 {Object.values(user).every(Boolean) &&
