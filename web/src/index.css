@@ -42,6 +42,7 @@
     --border-secondary: 216, 12%, 84%, 1;
     --border-subtle: 220, 13%, 91%, 1;
     --border-hover: 218, 11%, 65%, 1;
+    --border-success: 154, 41%, 97%, 1;
 
     --radius: 0.5rem;
   }

@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { FC, useEffect, useState } from 'react'
-
 import { FiMic } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 
 import { LanguageCode } from '@/lib/types/language'
 import { TranscriptionData } from '@/lib/types/transcription'
@@ -81,7 +81,11 @@ export const RecordingToggle: FC<RecordProps> = ({
           },
           isFinal: true
         }
-
+        toast.success('Message recorded', {
+          className:
+            'text-lg px-5 border-1 border-[#31C48D] bg-[#F3FAF7] rounded border-[1px] border-success',
+          duration: 4000
+        })
         setFinalTranscript(finalTranscriptionResult)
         onTranscriptionChange(finalTranscriptionResult)
       } else {

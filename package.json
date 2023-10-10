@@ -39,5 +39,8 @@
   },
   "lint-staged": {
     "*.{js,jsx}": "eslint --cache --fix"
+  },
+  "dependencies": {
+    "react-hot-toast": "^2.4.1"
   }
 }
