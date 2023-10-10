@@ -1,5 +1,5 @@
 .container {
-  width: clamp(200px, 1200px, 100vw);
+  width: 89rem;
   justify-content: center;
   align-items: start;
   flex-direction: column;

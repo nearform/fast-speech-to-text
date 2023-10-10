@@ -24,12 +24,12 @@ export const CreateRoom = () => {
       >
         Your name
       </label>
-      <div className="relative rounded-md shadow-sm">
+      <div className="relative rounded-lg shadow-sm">
         <input
           name="userName"
           type="text"
           id="userName"
-          className="block w-full bg-gray-50 rounded-md border-0 py-1 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          className="block w-full bg-gray-50 rounded-lg border-0 py-1.5 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setUser({ ...user, name: e.target.value })
           }
@@ -43,7 +43,7 @@ export const CreateRoom = () => {
       >
         Your language
       </label>
-      <div className="relative rounded-md shadow-sm">
+      <div className="relative rounded-lg shadow-sm">
         <select
           name="userLang"
           id="userLang"
@@ -51,7 +51,7 @@ export const CreateRoom = () => {
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
             setUser({ ...user, language: e.target.value as LanguageCode })
           }}
-          className="align-middle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full py-1 px-2 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          className="align-middle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2 px-2 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
         >
           {AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
             <option key={`lang-${code}`} value={code} className="align-middle">
