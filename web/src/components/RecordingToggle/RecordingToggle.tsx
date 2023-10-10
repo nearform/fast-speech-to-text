@@ -1,10 +1,7 @@
 import clsx from 'clsx'
 import { FC, useEffect, useState } from 'react'
 
-import {
-  FiMic as StartRecording,
-  FiMicOff as StopRecording
-} from 'react-icons/fi'
+import { FiMic } from 'react-icons/fi'
 
 import { LanguageCode } from '@/lib/types/language'
 import { TranscriptionData } from '@/lib/types/transcription'
@@ -118,10 +115,23 @@ export const RecordingToggle: FC<RecordProps> = ({
   return (
     <>
       <button
-        className={clsx('recognizing-toggle', { active: isRecording })}
+        className={clsx(
+          'recognizing-toggle inline-flex items-center justify-center text-sm font-medium text-base ring-offset-background transition-colors bg-primary text-white rounded-lg px-3 py-2 max-w-[185px] w-full [&.active]:bg-red-600',
+          { active: isRecording }
+        )}
         onClick={() => toggleRecognition(recognition)}
       >
-        {isRecording ? <StopRecording /> : <StartRecording />}
+        {isRecording ? (
+          <>
+            <FiMic />
+            <span className="pl-2">Stop recording</span>
+          </>
+        ) : (
+          <>
+            <FiMic />
+            <span className="pl-2">Add a voice message</span>
+          </>
+        )}
       </button>
     </>
   )

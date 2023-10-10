@@ -15,6 +15,11 @@ export default {
         '2xl': '1400px'
       }
     },
+    fontSize: {
+      medium: '1rem',
+      base: '0.875rem',
+      xs: '0.626rem'
+    },
     extend: {
       colors: {
         border: {

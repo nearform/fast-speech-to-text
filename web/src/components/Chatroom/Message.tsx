@@ -1,19 +1,20 @@
 import { FC, useState } from 'react'
 
-import { FiVolume2 as Play, FiVolumeX as Stop } from 'react-icons/fi'
-
 import { differenceInDays, format } from 'date-fns'
+import SoundIcon from '@/icons/SoundIcon'
 
 type MessageEventProps = {
   message: string
   timestamp: number
   language: string
+  user: string
 }
 
 export const MessageEvent: FC<MessageEventProps> = ({
   message,
   timestamp,
-  language
+  language,
+  user
 }) => {
   const [playing, setPlaying] = useState<boolean>(false)
   const formatToUse = differenceInDays(timestamp, Date.now())
@@ -37,14 +38,22 @@ export const MessageEvent: FC<MessageEventProps> = ({
   }
 
   return (
-    <div className="message-event">
-      <div className="message-event-content">
-        <p className="message-event-content-text">{message}</p>
-        <button className="message-event-content-replay" onClick={handleReplay}>
-          {playing ? <Stop /> : <Play />}
-        </button>
+    <div className="message-event rounded-lg bg-white border p-3 max-w-[50%]">
+      <div className="message-event-content text-left">
+        <div className="message-header flex justify-between">
+          <p className="text-xs leading-[1.3rem]">{user}</p>
+          <button
+            className={`message-event-content-replay p-1 border-transparent border-[1px] [&.crossed]:border-black ${
+              playing && 'crossed'
+            }`}
+            onClick={handleReplay}
+          >
+            <SoundIcon />
+          </button>
+        </div>
+        <p className="message-event-content-text text-base">{message}</p>
       </div>
-      <p className="message-event-timestamp">
+      <p className="message-event-timestamp text-right text-[10px] text-[#9CA3AF]">
         {format(new Date(timestamp), formatToUse)}
       </p>
     </div>

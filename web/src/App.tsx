@@ -17,10 +17,10 @@ const App = () => {
     <RecoilRoot>
       <div
         id="primary-container"
-        className="h-screen relative container flex flex-col"
+        className="h-screen relative container flex flex-col max-w-[1370px] p-[1.25rem]"
       >
         <Header />
-        <div className="container py-8 flex flex-1 overflow-y-auto justify-start">
+        <div className="container py-8 flex flex-1 overflow-y-auto justify-start h-full">
           <Chat rtdbRef={db} />
         </div>
       </div>

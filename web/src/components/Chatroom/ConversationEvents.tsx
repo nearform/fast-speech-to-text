@@ -40,7 +40,7 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
   }, [userName, events])
 
   return (
-    <div className="chat-events">
+    <div className="chat-events bg-background-accent-subtle">
       {!loading && events.length
         ? events.map((event, idx) => (
             <ConversationEvent
