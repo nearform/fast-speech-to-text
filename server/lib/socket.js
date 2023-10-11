@@ -78,12 +78,13 @@ function socket(instance, opts, done) {
       const [translateFrom, translateTo, roomId, user, transcribedText] =
         deconstructMessage(rawData)
 
-      instance.log.info(
-        { length: transcribedText.length },
-        'Got continuous message from client'
-      )
+      instance.log.info(`Transcribed text: ${transcribedText}`)
+
       if (transcribedText) {
         let translated = await translateText(transcribedText, translateTo)
+
+        instance.log.info(`Translated text: ${translated}`)
+
         // if the to & from languages are the same there's no point
         // in translating them so just return the transcription
         if (translateFrom !== translateTo) {

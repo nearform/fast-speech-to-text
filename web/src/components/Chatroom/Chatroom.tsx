@@ -129,11 +129,8 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
     }
   }
 
-  const handleRecordingToggle = (
-    transcription: TranscriptionData,
-    isRecording: boolean
-  ): void => {
-    if (!isRecording && transcription) {
+  const sendRecordedTranscript = (transcription: TranscriptionData): void => {
+    if (transcription) {
       const {
         transcription: { text }
       } = transcription
@@ -162,7 +159,6 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
           setBufferedMessages(prev => [...prev, binaryMsg])
         }
       } else if (readyState === ReadyState.OPEN) {
-        console.debug('WebSocket connection active, sending message')
         sendMessage(binaryMsg)
       } else {
         console.warn(
@@ -204,7 +200,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
               isHost ? chatroom?.host.language : chatroom?.guest?.language
             }
             onTranscriptionChange={handleTranscriptionOutput}
-            onRecordingToggle={handleRecordingToggle}
+            onRecognitionEnd={sendRecordedTranscript}
           />
         </div>
       </div>

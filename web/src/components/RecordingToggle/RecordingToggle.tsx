@@ -10,53 +10,50 @@ import './styles.css'
 
 type RecordProps = {
   langFrom: LanguageCode
-  onRecordingToggle: (
-    transcription: TranscriptionData,
-    isRecording: boolean
-  ) => void
+  onRecognitionEnd: (transcription: TranscriptionData) => void
   onTranscriptionChange: (transcription: TranscriptionData) => void
 }
 
-const RECOGNITION_ERRORS = ['no-speech', 'audio-capture', 'not-allowed']
+const RECOGNITION_ERRORS = ['no-speech', 'not-allowed']
 const recognition = window.SpeechRecognition
   ? new window.SpeechRecognition()
   : new window.webkitSpeechRecognition()
 
 export const RecordingToggle: FC<RecordProps> = ({
   langFrom,
-  onRecordingToggle,
+  onRecognitionEnd,
   onTranscriptionChange
 }) => {
   const [finalTranscript, setFinalTranscript] =
     useState<TranscriptionData | null>(null)
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const [isIgnoreRecognitionOnEnd, setIsIgnoreRecognitionOnEnd] =
-    useState<boolean>(false)
 
   useEffect(() => {
-    if (isRecording || finalTranscript) {
-      onRecordingToggle(finalTranscript, isRecording)
+    if (isRecording && finalTranscript) {
+      onRecognitionEnd(finalTranscript)
     }
 
-    if (!isRecording) {
-      onTranscriptionChange(null)
-    }
+    onTranscriptionChange(null)
   }, [finalTranscript, isRecording])
 
   const recognitionOnErrorHandler = (event: SpeechRecognitionErrorEvent) => {
     console.error(`Speech recognition error detected: ${event.error}`)
     console.error(`Additional information: ${event.message}`)
     if (RECOGNITION_ERRORS.findIndex(e => e == event.error) >= 0) {
-      setIsIgnoreRecognitionOnEnd(true)
+      recognition.stop()
     }
   }
 
-  const recognitionOnEndHandler = () => {
-    if (isIgnoreRecognitionOnEnd) {
+  const recognitionOnEndHandler = (event: Event) => {
+    if (isRecording) {
+      console.log('on end handler triggered', event)
+      console.log('Restarting speech recognition service')
+      setFinalTranscript(null)
+      // recognition.start()
       return
     }
     console.log('Speech recognition service finished listening')
-    setIsRecording(false)
+    setFinalTranscript(null)
   }
 
   const recognitionOnStartHandler = () => {
@@ -68,6 +65,7 @@ export const RecordingToggle: FC<RecordProps> = ({
     let interimTranscript = ''
 
     if (typeof event.results == 'undefined') {
+      console.log('UNDEFINED result recieved. Stopping recognition!')
       recognition.onend = null
       recognition.stop()
       return
@@ -75,21 +73,23 @@ export const RecordingToggle: FC<RecordProps> = ({
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        const finalTranscriptionResult: TranscriptionData = {
-          type: 'transcription',
-          transcription: {
-            text: event.results[i][0].transcript,
-            language: langFrom
-          },
-          isFinal: true
+        const finalTranscript = event.results[i][0].transcript
+        if (finalTranscript.trim() !== '') {
+          const finalTranscriptionResult: TranscriptionData = {
+            type: 'transcription',
+            transcription: {
+              text: finalTranscript,
+              language: langFrom
+            },
+            isFinal: true
+          }
+          toast.success('Message recorded & sent', {
+            className:
+              'text-lg px-5 border-1 border-[#31C48D] bg-[#F3FAF7] rounded border-[1px] border-success',
+            duration: 4000
+          })
+          setFinalTranscript(finalTranscriptionResult)
         }
-        toast.success('Message recorded', {
-          className:
-            'text-lg px-5 border-1 border-[#31C48D] bg-[#F3FAF7] rounded border-[1px] border-success',
-          duration: 4000
-        })
-        setFinalTranscript(finalTranscriptionResult)
-        onTranscriptionChange(finalTranscriptionResult)
       } else {
         interimTranscript += event.results[i][0].transcript
         onTranscriptionChange({
@@ -109,12 +109,13 @@ export const RecordingToggle: FC<RecordProps> = ({
   recognition.onend = recognitionOnEndHandler
   recognition.onresult = recognitionOnResultHandler
 
-  const toggleRecognition = (recognition: SpeechRecognition) => {
+  const toggleRecording = (recognition: SpeechRecognition) => {
     if (isRecording) {
       recognition.stop()
+      setFinalTranscript(null)
+      setIsRecording(false)
     } else {
       recognition.start()
-      setIsIgnoreRecognitionOnEnd(false)
     }
   }
 
@@ -125,7 +126,7 @@ export const RecordingToggle: FC<RecordProps> = ({
           'recognizing-toggle inline-flex items-center justify-center text-sm font-medium text-base ring-offset-background transition-colors bg-primary text-white rounded-lg px-3 py-2 max-w-[185px] w-full [&.active]:bg-red-600',
           { active: isRecording }
         )}
-        onClick={() => toggleRecognition(recognition)}
+        onClick={() => toggleRecording(recognition)}
       >
         {isRecording ? (
           <>
