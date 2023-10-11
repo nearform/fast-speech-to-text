@@ -27,7 +27,8 @@ export const RecordingToggle: FC<RecordProps> = ({
   onRecordingToggle,
   onTranscriptionChange
 }) => {
-  const [finalTranscript, setFinalTranscript] = useState<TranscriptionData>()
+  const [finalTranscript, setFinalTranscript] =
+    useState<TranscriptionData | null>(null)
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [isIgnoreRecognitionOnEnd, setIsIgnoreRecognitionOnEnd] =
     useState<boolean>(false)
@@ -59,6 +60,7 @@ export const RecordingToggle: FC<RecordProps> = ({
   }
 
   const recognitionOnStartHandler = () => {
+    setFinalTranscript(null)
     setIsRecording(true)
   }
 
