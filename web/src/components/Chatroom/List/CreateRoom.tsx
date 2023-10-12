@@ -45,8 +45,11 @@ export const CreateRoom = () => {
       </label>
       <div className="relative rounded-lg shadow-sm">
         <Select
+          name="userLang"
+          id="userLang"
           classNames={{
-            control: () => '!bg-gray-50 !rounded-lg'
+            control: () => '!bg-gray-50 !rounded-lg',
+            indicatorSeparator: () => 'hidden'
           }}
           options={AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
             value: code as LanguageCode,
