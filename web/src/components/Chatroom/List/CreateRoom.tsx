@@ -5,6 +5,7 @@ import languagesLookup from '@/lib/data/languages.json'
 
 import { user as userAtom } from '@/state'
 import Select from 'react-select'
+import { LanguageCode } from '@/lib/types/language'
 
 const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
   Object.entries<{
@@ -48,9 +49,10 @@ export const CreateRoom = () => {
             control: () => '!bg-gray-50 !rounded-lg'
           }}
           options={AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
-            value: code,
+            value: code as LanguageCode,
             label: ` ${flag} ${name}`
           }))}
+          onChange={option => setUser({ ...user, language: option.value })}
         />
       </div>
     </div>

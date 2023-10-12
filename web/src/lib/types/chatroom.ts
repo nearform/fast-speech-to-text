@@ -17,8 +17,8 @@ export type ConversationEvent = {
   type: 'message' | 'entryExit'
   user: string
   message?: {
-    langFrom?: string
-    langTo?: string
+    langFrom?: LanguageCode
+    langTo?: LanguageCode
     original: string
     translated?: string
   }
