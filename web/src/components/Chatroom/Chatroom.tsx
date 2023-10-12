@@ -189,7 +189,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
         <div className="chat-footer flex gap-3">
           <textarea
             rows={3}
-            className="transcribed-text w-full bg-transparent border rounded-lg p-2 "
+            className="transcribed-text flex-auto bg-transparent border rounded-lg p-2 "
             disabled
             placeholder="Hit record & start talking to see a live transcription here.  Stop recording to send your message"
             value={transcribedText}
