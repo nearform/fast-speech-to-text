@@ -3,9 +3,8 @@ import { useRecoilState } from 'recoil'
 
 import languagesLookup from '@/lib/data/languages.json'
 
-import { LanguageCode } from '@/lib/types/language'
-
 import { user as userAtom } from '@/state'
+import Select from 'react-select'
 
 const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
   Object.entries<{
@@ -44,21 +43,15 @@ export const CreateRoom = () => {
         Your language
       </label>
       <div className="relative rounded-lg shadow-sm">
-        <select
-          name="userLang"
-          id="userLang"
-          value={user.language}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            setUser({ ...user, language: e.target.value as LanguageCode })
+        <Select
+          classNames={{
+            control: () => '!bg-gray-50 !rounded-lg'
           }}
-          className="align-middle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2 px-2 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-        >
-          {AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
-            <option key={`lang-${code}`} value={code} className="align-middle">
-              {flag} {name}
-            </option>
-          ))}
-        </select>
+          options={AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
+            value: code,
+            label: ` ${flag} ${name}`
+          }))}
+        />
       </div>
     </div>
   )
