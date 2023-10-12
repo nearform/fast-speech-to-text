@@ -16,6 +16,11 @@ const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
 export const CreateRoom = () => {
   const [user, setUser] = useRecoilState(userAtom)
 
+  const languageOptions = AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
+    value: code as LanguageCode,
+    label: ` ${flag} ${name}`
+  }))
+
   return (
     <div className="chatroom-list-item create">
       <label
@@ -51,10 +56,10 @@ export const CreateRoom = () => {
             control: () => '!bg-gray-50 !rounded-lg',
             indicatorSeparator: () => 'hidden'
           }}
-          options={AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
-            value: code as LanguageCode,
-            label: ` ${flag} ${name}`
-          }))}
+          options={languageOptions}
+          defaultValue={languageOptions.find(
+            option => option.value === user.language
+          )}
           onChange={option => setUser({ ...user, language: option.value })}
         />
       </div>
