@@ -3,9 +3,9 @@ import { useRecoilState } from 'recoil'
 
 import languagesLookup from '@/lib/data/languages.json'
 
-import { LanguageCode } from '@/lib/types/language'
-
 import { user as userAtom } from '@/state'
+import Select from 'react-select'
+import { LanguageCode } from '@/lib/types/language'
 
 const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
   Object.entries<{
@@ -15,6 +15,11 @@ const AVAILABLE_COUNTRIES: [string, { name: string; flag: string }][] =
 
 export const CreateRoom = () => {
   const [user, setUser] = useRecoilState(userAtom)
+
+  const languageOptions = AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => ({
+    value: code as LanguageCode,
+    label: ` ${flag} ${name}`
+  }))
 
   return (
     <div className="chatroom-list-item create">
@@ -44,21 +49,19 @@ export const CreateRoom = () => {
         Your language
       </label>
       <div className="relative rounded-lg shadow-sm">
-        <select
+        <Select
           name="userLang"
           id="userLang"
-          value={user.language}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            setUser({ ...user, language: e.target.value as LanguageCode })
+          classNames={{
+            control: () => '!bg-gray-50 !rounded-lg',
+            indicatorSeparator: () => 'hidden'
           }}
-          className="align-middle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2 px-2 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-        >
-          {AVAILABLE_COUNTRIES.map(([code, { flag, name }]) => (
-            <option key={`lang-${code}`} value={code} className="align-middle">
-              {flag} {name}
-            </option>
-          ))}
-        </select>
+          options={languageOptions}
+          defaultValue={languageOptions.find(
+            option => option.value === user.language
+          )}
+          onChange={option => setUser({ ...user, language: option.value })}
+        />
       </div>
     </div>
   )
