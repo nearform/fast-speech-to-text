@@ -15,7 +15,7 @@ type ChatEventsProps = {
 
 export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
   const room = useRecoilValue(activeRoom)
-  const { name: userName, language } = useRecoilValue(user)
+  const activeUser = useRecoilValue(user)
   const { events, loading } = useMessages({ rtdbRef, roomId: room?.id })
 
   const eventRef = useRef<HTMLDivElement>()
@@ -26,18 +26,18 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
     if (
       lastEvent &&
       lastEvent.type === 'message' &&
-      lastEvent.user !== userName
+      lastEvent.user.name !== activeUser.name
     ) {
       const utterance = new SpeechSynthesisUtterance(
         lastEvent.message?.translated
       )
-      utterance.lang = language
+      utterance.lang = activeUser.language
 
       speechSynthesis.speak(utterance)
     }
 
     eventRef.current?.scrollIntoView()
-  }, [userName, events])
+  }, [activeUser.name, events])
 
   return (
     <div className="chat-events bg-background-accent-subtle">
@@ -46,7 +46,7 @@ export const ChatEvents: FC<ChatEventsProps> = ({ rtdbRef }) => {
             <ConversationEvent
               event={event}
               key={`event-${idx + 1}`}
-              isSentByUser={event.user === userName}
+              isSentByUser={event.user.name === activeUser.name}
               eventRef={idx === events.length - 1 ? eventRef : undefined}
             />
           ))

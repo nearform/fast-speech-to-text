@@ -1,15 +1,16 @@
 import { FC, useState } from 'react'
 
-import { differenceInDays, format } from 'date-fns'
 import SoundIcon from '@/icons/SoundIcon'
 import languages from '@/lib/data/languages.json'
+import { User } from '@/lib/types/chatroom'
 import { LanguageCode } from '@/lib/types/language'
+import { differenceInDays, format } from 'date-fns'
 
 type MessageEventProps = {
   message: string
   timestamp: number
   language: LanguageCode
-  user: string
+  user: User
 }
 
 export const MessageEvent: FC<MessageEventProps> = ({
@@ -28,7 +29,7 @@ export const MessageEvent: FC<MessageEventProps> = ({
 
     if (!playing) {
       const utterance = new SpeechSynthesisUtterance(message)
-      utterance.lang = language || window.navigator.language
+      utterance.lang = language || user.language || window.navigator.language
       utterance.addEventListener('end', () => {
         setPlaying(false)
       })
@@ -44,7 +45,7 @@ export const MessageEvent: FC<MessageEventProps> = ({
       <div className="message-event-content text-left">
         <div className="message-header flex justify-between">
           <p className="text-xs leading-[1.3rem]">
-            {languages[language]?.flag} {user}
+            {languages[user.language]?.flag} {user.name}
           </p>
           <button
             className={`message-event-content-replay p-1 border-transparent border-[1px] [&.crossed]:border-black ${

@@ -1,5 +1,5 @@
-import { FC, RefObject } from 'react'
 import clsx from 'clsx'
+import { FC, RefObject } from 'react'
 
 import { ConversationEvent as IChatEvent } from '@/lib/types/chatroom'
 import { EntryExitEvent } from './EntryExit'

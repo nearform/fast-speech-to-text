@@ -75,7 +75,7 @@ function socket(instance, opts, done) {
     let message
 
     connection.socket.on('message', async rawData => {
-      const [translateFrom, translateTo, roomId, user, transcribedText] =
+      const [translateFrom, translateTo, roomId, userName, transcribedText] =
         deconstructMessage(rawData)
 
       instance.log.info(`Transcribed text: ${transcribedText}`)
@@ -114,7 +114,10 @@ function socket(instance, opts, done) {
           },
           timestamp: Date.now(),
           type: 'message',
-          user
+          user: {
+            name: userName,
+            language: translateFrom
+          }
         }
 
         instance.log.info('Translation finished')

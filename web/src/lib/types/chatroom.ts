@@ -1,21 +1,20 @@
 import { LanguageCode } from './language'
 
+export type User = {
+  name: string
+  language: LanguageCode
+}
+
 export type Chatroom = {
-  guest?: {
-    name: string
-    language: LanguageCode
-  }
-  host: {
-    name: string
-    language: LanguageCode
-  }
+  guest?: User
+  host: User
   name: string
   id: string // UUID generated server-side
 }
 
 export type ConversationEvent = {
   type: 'message' | 'entryExit'
-  user: string
+  user: User
   message?: {
     langFrom?: LanguageCode
     langTo?: LanguageCode
