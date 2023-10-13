@@ -175,14 +175,24 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   return room ? (
     <div className="chat-container w-full h-full flex flex-col">
       <div className="chat-header gap-6 flex flex-auto grow-0 shrink-1 pb-2">
-        <button
-          className="leave-chat text-medium border-none bg-transparent font-bold"
-          onClick={handleLeave}
-        >
-          <BiArrowBack className="inline-block align-middle mt-[-3px]" />
-          Back
-        </button>
-        <h2 className="chat-name text-medium font-normal">{chatroom?.name}</h2>
+        <div className="flex flex-1 justify-start gap-6">
+          <button
+            className="leave-chat text-normal border-none bg-transparent font-black"
+            onClick={handleLeave}
+          >
+            <BiArrowBack className="inline-block align-middle mt-[-3px]" />
+            Back
+          </button>
+          <h2 className="chat-name text-normal font-normal">
+            {chatroom?.name}
+          </h2>
+        </div>
+        <div className="flex flex-1 justify-end items-center gap-1">
+          <p className="text-xs text-muted font-normal">Hosted by:</p>
+          <p className="text-xs text-muted font-semibold">
+            {chatroom?.host.name}
+          </p>
+        </div>
       </div>
       <div className="border h-full rounded-lg flex-1 flex flex-col">
         <ChatEvents rtdbRef={rtdbRef} />
