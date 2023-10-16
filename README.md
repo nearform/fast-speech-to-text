@@ -1,6 +1,6 @@
 # Fast speech to text experiments
 
-Repo containing experiments/explorations/proofs-of-concept for fast speech to text (and back again).
+Repository containing experiments/explorations/proof-of-concept for fast speech to text (and back again) and "real time" chat.
 
 The basic idea being validated here is that streaming speech to text can allow us to create a speech-to-speech bot that responds more naturally, because it transcribes the input as it arrives.
 
