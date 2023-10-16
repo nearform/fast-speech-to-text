@@ -17,8 +17,9 @@ export default {
     },
     fontSize: {
       medium: '1rem',
-      base: '0.875rem',
-      xs: '0.626rem'
+      base: '1rem',
+      sm: '0.875rem',
+      xs: '0.75rem'
     },
     extend: {
       colors: {
@@ -52,8 +53,8 @@ export default {
           foreground: 'hsl(var(--destructive-foreground))'
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))'
+          DEFAULT: 'rgba(107, 114, 128, 1)',
+          foreground: 'rgba(107, 114, 128, 1)'
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',

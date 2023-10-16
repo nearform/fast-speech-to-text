@@ -103,7 +103,7 @@ export const convertTranscriptionMessageToBinaryMessage = (
   // add the room ID & user name so that we can store the
   // message after translating
   const roomIdBuffer = stringToBuffer(roomId)
-  const roomIdOffset = 1 + languagesBuffer.byteLength
+  const roomIdOffset = languagesOffset + languagesBuffer.byteLength
 
   const userBuffer = stringToBuffer(userName.padEnd(25, '*'))
   const userOffset = roomIdOffset + roomIdBuffer.length

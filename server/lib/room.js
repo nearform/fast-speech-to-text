@@ -11,7 +11,12 @@ const eventSchema = {
         .prop('original', S.string().required())
         .prop('translated', S.string())
     )
-    .prop('user', S.string().required())
+    .prop(
+      'user',
+      S.object()
+        .prop('name', S.string().required())
+        .prop('language', S.string().required())
+    )
 }
 const roomSchema = {
   body: S.object()
@@ -51,15 +56,18 @@ export default (instance, opts, done) => {
         .prop('name', S.string().required())
         .prop('language', S.string().required())
     },
-    async ({ body, params }) => {
+    async ({ body: { name, language }, params }) => {
       try {
-        instance.rtdb.update(`rooms/${params.id}/guest`, body)
+        instance.rtdb.update(`rooms/${params.id}/guest`, { name, language })
 
         // push event to room for guest joining
         instance.rtdb.push(`events/${params.id}`, {
           event: 'joined',
           type: 'entryExit',
-          user: body.name,
+          user: {
+            name,
+            language
+          },
           timestamp: Date.now()
         })
       } catch (error) {
@@ -72,11 +80,16 @@ export default (instance, opts, done) => {
     {
       schema: S.object()
         .prop('role', S.string().enum(['host', 'guest']).required())
-        .prop('name', S.string().required())
+        .prop(
+          'user',
+          S.object()
+            .prop('name', S.string().required())
+            .prop('language', S.string().required())
+        )
     },
-    async ({ body, params }) => {
+    async ({ body: { role, user }, params }) => {
       // if host leaves, nuke the room & any events
-      if (body.role === 'host') {
+      if (role === 'host') {
         instance.rtdb.delete(`rooms`, params.id)
         instance.rtdb.delete('events', params.id)
       } else {
@@ -86,7 +99,7 @@ export default (instance, opts, done) => {
         instance.rtdb.push(`events/${params.id}`, {
           event: 'left',
           type: 'entryExit',
-          user: body.name,
+          user,
           timestamp: Date.now()
         })
       }

@@ -1,73 +1,91 @@
-import clsx from 'clsx'
 import { FC, useEffect, useState } from 'react'
-import { FiMic } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 
 import { LanguageCode } from '@/lib/types/language'
 import { TranscriptionData } from '@/lib/types/transcription'
 
+import { IconMicOutline } from '@/icons/icon-mic-outline'
+import clsx from 'clsx'
+import { Switch } from '../Switch/switch'
 import './styles.css'
 
 type RecordProps = {
   langFrom: LanguageCode
-  onRecordingToggle: (
-    transcription: TranscriptionData,
-    isRecording: boolean
-  ) => void
+  onRecognitionEnd: (transcription: TranscriptionData) => void
   onTranscriptionChange: (transcription: TranscriptionData) => void
 }
 
-const RECOGNITION_ERRORS = ['no-speech', 'audio-capture', 'not-allowed']
+const RECOGNITION_ERRORS = ['no-speech', 'not-allowed']
 const recognition = window.SpeechRecognition
   ? new window.SpeechRecognition()
   : new window.webkitSpeechRecognition()
 
 export const RecordingToggle: FC<RecordProps> = ({
   langFrom,
-  onRecordingToggle,
+  onRecognitionEnd,
   onTranscriptionChange
 }) => {
   const [finalTranscript, setFinalTranscript] =
     useState<TranscriptionData | null>(null)
-  const [isRecording, setIsRecording] = useState<boolean>(false)
-  const [isIgnoreRecognitionOnEnd, setIsIgnoreRecognitionOnEnd] =
+  const [shouldRecord, setShouldRecord] = useState<boolean>(false)
+  const [isRecognitionRunning, setIsRecognitionRunning] =
     useState<boolean>(false)
 
   useEffect(() => {
-    if (isRecording || finalTranscript) {
-      onRecordingToggle(finalTranscript, isRecording)
+    if (finalTranscript) {
+      onRecognitionEnd(finalTranscript)
     }
 
-    if (!isRecording) {
-      onTranscriptionChange(null)
+    onTranscriptionChange(null)
+  }, [finalTranscript])
+
+  useEffect(() => {
+    if (!shouldRecord && isRecognitionRunning) {
+      recognition.stop()
+    } else if (shouldRecord && !isRecognitionRunning) {
+      try {
+        recognition.start()
+      } catch (error) {
+        console.warn(error)
+      }
     }
-  }, [finalTranscript, isRecording])
+  }, [shouldRecord, isRecognitionRunning])
 
   const recognitionOnErrorHandler = (event: SpeechRecognitionErrorEvent) => {
     console.error(`Speech recognition error detected: ${event.error}`)
     console.error(`Additional information: ${event.message}`)
     if (RECOGNITION_ERRORS.findIndex(e => e == event.error) >= 0) {
-      setIsIgnoreRecognitionOnEnd(true)
+      recognition.stop()
     }
   }
 
-  const recognitionOnEndHandler = () => {
-    if (isIgnoreRecognitionOnEnd) {
+  const recognitionOnEndHandler = (event: Event) => {
+    if (shouldRecord) {
+      console.log('on end handler triggered', event)
+      console.log('Restarting speech recognition service')
+      try {
+        recognition.start()
+      } catch (error) {
+        console.warn(error)
+      }
+      setFinalTranscript(null)
       return
     }
     console.log('Speech recognition service finished listening')
-    setIsRecording(false)
+    setFinalTranscript(null)
+    setIsRecognitionRunning(false)
   }
 
   const recognitionOnStartHandler = () => {
+    setIsRecognitionRunning(true)
     setFinalTranscript(null)
-    setIsRecording(true)
   }
 
   const recognitionOnResultHandler = (event: SpeechRecognitionEvent) => {
     let interimTranscript = ''
 
     if (typeof event.results == 'undefined') {
+      console.log('UNDEFINED result recieved. Stopping recognition!')
       recognition.onend = null
       recognition.stop()
       return
@@ -75,28 +93,31 @@ export const RecordingToggle: FC<RecordProps> = ({
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        const finalTranscriptionResult: TranscriptionData = {
-          type: 'transcription',
-          transcription: {
-            text: event.results[i][0].transcript,
-            language: langFrom
-          },
-          isFinal: true
+        const finalTranscript = event.results[i][0].transcript
+        if (finalTranscript.trim() !== '') {
+          const finalTranscriptionResult: TranscriptionData = {
+            type: 'transcription',
+            transcription: {
+              text: finalTranscript,
+              language: langFrom
+            },
+            isFinal: true
+          }
+          toast.success('Message recorded & sent', {
+            className:
+              'text-lg px-5 border-1 border-[#31C48D] bg-[#F3FAF7] rounded border-[1px] border-success',
+            duration: 4000
+          })
+          setFinalTranscript(finalTranscriptionResult)
         }
-        toast.success('Message recorded', {
-          className:
-            'text-lg px-5 border-1 border-[#31C48D] bg-[#F3FAF7] rounded border-[1px] border-success',
-          duration: 4000
-        })
-        setFinalTranscript(finalTranscriptionResult)
-        onTranscriptionChange(finalTranscriptionResult)
       } else {
         interimTranscript += event.results[i][0].transcript
-        onTranscriptionChange({
+        const interimTranscriptData: TranscriptionData = {
           type: 'transcription',
           transcription: { text: interimTranscript, language: langFrom },
           isFinal: false
-        })
+        }
+        onTranscriptionChange(interimTranscriptData)
       }
     }
   }
@@ -109,36 +130,29 @@ export const RecordingToggle: FC<RecordProps> = ({
   recognition.onend = recognitionOnEndHandler
   recognition.onresult = recognitionOnResultHandler
 
-  const toggleRecognition = (recognition: SpeechRecognition) => {
-    if (isRecording) {
-      recognition.stop()
-    } else {
-      recognition.start()
-      setIsIgnoreRecognitionOnEnd(false)
-    }
-  }
-
   return (
     <>
-      <button
-        className={clsx(
-          'recognizing-toggle inline-flex items-center justify-center text-sm font-medium text-base ring-offset-background transition-colors bg-primary text-white rounded-lg px-3 py-2 max-w-[185px] w-full [&.active]:bg-red-600',
-          { active: isRecording }
-        )}
-        onClick={() => toggleRecognition(recognition)}
-      >
-        {isRecording ? (
-          <>
-            <FiMic />
-            <span className="pl-2">Stop recording</span>
-          </>
-        ) : (
-          <>
-            <FiMic />
-            <span className="pl-2">Add a voice message</span>
-          </>
-        )}
-      </button>
+      <div className="flex flex-wrap justify-end items-center">
+        <Switch
+          defaultChecked={shouldRecord}
+          checked={shouldRecord}
+          onCheckedChange={setShouldRecord}
+          name="toggle-recording"
+          id="toggle-recording"
+        />
+        <label
+          className="block text-sm font-normal leading-6 text-gray-900 mx-1"
+          htmlFor="toggle-recording"
+        >
+          Voice recording
+        </label>
+        <IconMicOutline />
+        <div
+          className={clsx('recognition-on rounded-full mx-1 invisible', {
+            active: isRecognitionRunning
+          })}
+        ></div>
+      </div>
     </>
   )
 }

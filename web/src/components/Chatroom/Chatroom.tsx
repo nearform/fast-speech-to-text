@@ -46,7 +46,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   )
   const [transcribedText, setTranscribedText] = useState<string>('')
 
-  const { name: userName } = useRecoilValue(user)
+  const activeUser = useRecoilValue(user)
   const [room, setRoom] = useRecoilState(activeRoom)
   const isHost = useRecoilValue(userIsHost)
 
@@ -107,7 +107,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
     try {
       await axios.put(`api/room/${room?.id}/leave`, {
         role: isHost ? 'host' : 'guest',
-        name: userName
+        user: activeUser
       })
       setRoom(null)
     } catch (error) {
@@ -129,11 +129,8 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
     }
   }
 
-  const handleRecordingToggle = (
-    transcription: TranscriptionData,
-    isRecording: boolean
-  ): void => {
-    if (!isRecording && transcription) {
+  const sendRecordedTranscript = (transcription: TranscriptionData): void => {
+    if (transcription) {
       const {
         transcription: { text }
       } = transcription
@@ -150,7 +147,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
         langFrom,
         langTo,
         room?.id,
-        userName,
+        activeUser.name,
         text
       )
 
@@ -162,7 +159,6 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
           setBufferedMessages(prev => [...prev, binaryMsg])
         }
       } else if (readyState === ReadyState.OPEN) {
-        console.debug('WebSocket connection active, sending message')
         sendMessage(binaryMsg)
       } else {
         console.warn(
@@ -179,32 +175,40 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
   return room ? (
     <div className="chat-container w-full h-full flex flex-col">
       <div className="chat-header gap-6 flex flex-auto grow-0 shrink-1 pb-2">
-        <button
-          className="leave-chat text-medium border-none bg-transparent font-bold"
-          onClick={handleLeave}
-        >
-          <BiArrowBack className="inline-block align-middle mt-[-3px]" />
-          Back
-        </button>
-        <h2 className="chat-name text-medium font-normal">{chatroom?.name}</h2>
+        <div className="flex flex-1 justify-start gap-6">
+          <button
+            className="leave-chat text-normal border-none bg-transparent font-black"
+            onClick={handleLeave}
+          >
+            <BiArrowBack className="inline-block align-middle mt-[-3px]" />
+            Back
+          </button>
+          <h2 className="chat-name text-normal font-normal">
+            {chatroom?.name}
+          </h2>
+        </div>
+        <div className="flex flex-1 justify-end items-center gap-1">
+          <p className="text-xs text-muted font-normal">Hosted by:</p>
+          <p className="text-xs text-muted font-semibold">
+            {chatroom?.host.name}
+          </p>
+        </div>
       </div>
       <div className="border h-full rounded-lg flex-1 flex flex-col">
         <ChatEvents rtdbRef={rtdbRef} />
         <div className="chat-footer flex gap-3">
           <textarea
             rows={3}
-            className="transcribed-text w-full bg-transparent border rounded-lg p-2 "
+            className="transcribed-text flex-auto bg-transparent border rounded-lg p-2 "
             disabled
-            placeholder="Hit record & start talking to see a live transcription here.  Stop recording to send your message"
+            placeholder="Start talking to see a live transcription here. Toggle the recording switch to start/stop recording."
             value={transcribedText}
           />
 
           <RecordingToggle
-            langFrom={
-              isHost ? chatroom?.host.language : chatroom?.guest?.language
-            }
+            langFrom={activeUser.language}
             onTranscriptionChange={handleTranscriptionOutput}
-            onRecordingToggle={handleRecordingToggle}
+            onRecognitionEnd={sendRecordedTranscript}
           />
         </div>
       </div>
