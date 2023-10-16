@@ -27,7 +27,7 @@ export const RecordingToggle: FC<RecordProps> = ({
 }) => {
   const [finalTranscript, setFinalTranscript] =
     useState<TranscriptionData | null>(null)
-  const [shouldRecord, setShouldRecord] = useState<boolean>(true)
+  const [shouldRecord, setShouldRecord] = useState<boolean>(false)
   const [isRecognitionRunning, setIsRecognitionRunning] =
     useState<boolean>(false)
 
