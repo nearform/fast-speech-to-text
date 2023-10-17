@@ -181,7 +181,7 @@ export const ChatWrapper: FC<ChatWrapperProps> = ({ rtdbRef }) => {
             onClick={handleLeave}
           >
             <BiArrowBack className="inline-block align-middle mt-[-3px]" />
-            Back
+            <p className="inline-block px-2">Back</p>
           </button>
           <h2 className="chat-name text-normal font-normal">
             {chatroom?.name}
