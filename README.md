@@ -7,28 +7,29 @@ The basic idea being validated here is that streaming speech to text can allow u
 > [!NOTE]
 > The project currently properly runs in Chrome and other Webkit based browsers.
 
-## Running things
+## Running things locally (local development)
 
 ### Pre-requisites
 
 The project is using Application Default Credentials for Google Cloud Translation API.
-Before running the server, you will need to authenticate using Coogle Cloud CLI. To set up user credentials using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev). Once authenticated you can run the server with `npm run -w server`.
+Before running the server, you will need to authenticate using Coogle Cloud CLI. In order to have server successfully connect to the Firebase RealTime DB, you'll need to impersonate the Service Account that used in GCP.
+
+- To set up user credentials using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev). 
+- To impersonate a service account using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#sa-impersonation). ***Make sure that your account has the `Service Account Token Creator` permission in GCP.***
+
+Once authenticated successfully, you can run the server with `npm run -w server`.
 
 > [!NOTE]
 > This process has to be done ONLY once as the credentials will be generated for you and kept on a "well known" location. For more information see [How Application Default Credentials Work](https://cloud.google.com/docs/authentication/application-default-credentials)
 
 ### Environment Variables
 
-You will need the following environment variables set - use `.env` files in the `server/` directory to set them:
+You will need the following environment variable - use `.env` files in the `server/` directory to set it:
 
 ```
 # server/.env
 
-FIREBASE_API_KEY=
-FIREBASE_APP_ID=
-FIREBASE_AUTH_DOMAIN=
 FIREBASE_RTDB_URL=
-FIREBASE_PROJECT_ID=
 ```
 
 ### Launching the application

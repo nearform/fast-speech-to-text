@@ -1,13 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import {
-  child,
-  getDatabase,
-  push,
-  ref,
-  remove,
-  set,
-  update
-} from 'firebase/database'
+import admin from 'firebase-admin'
+import { applicationDefault } from 'firebase-admin/app'
+import { child, push, ref, remove, set, update } from 'firebase/database'
 
 export class RealtimeDatabaseClient {
   constructor(db) {
@@ -15,18 +8,13 @@ export class RealtimeDatabaseClient {
   }
 
   static init() {
-    const firebaseConfig = {
-      apiKey: process.env.FIREBASE_API_KEY,
-      appId: process.env.FIREBASE_APP_ID,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      databaseURL: process.env.FIREBASE_RTDB_URL,
-      projectId: process.env.FIREBASE_PROJECT_ID
-    }
-
     try {
-      initializeApp(firebaseConfig)
+      const app = admin.initializeApp({
+        credential: applicationDefault(),
+        databaseURL: process.env.FIREBASE_RTDB_URL
+      })
 
-      return new RealtimeDatabaseClient(getDatabase())
+      return new RealtimeDatabaseClient(app.database())
     } catch (error) {
       console.error(error)
       throw new Error('Failed to initialise realtime database')
