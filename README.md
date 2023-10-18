@@ -15,7 +15,7 @@ The project is using Application Default Credentials for Google Cloud Translatio
 Before running the server, you will need to authenticate using Coogle Cloud CLI. In order to have server successfully connect to the Firebase RealTime DB, you'll need to impersonate the Service Account that used in GCP.
 
 - To set up user credentials using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev). 
-- To impersonate a service account using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#sa-impersonation).
+- To impersonate a service account using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#sa-impersonation). ***Make sure that your account has the `Service Account Token Creator` permission in GCP.***
 
 Once authenticated successfully, you can run the server with `npm run -w server`.
 
