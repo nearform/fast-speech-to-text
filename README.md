@@ -50,5 +50,5 @@ npm run dev
 
 Open [localhost:5173](http://localhost:5173) in your browser.
 
-## Demo application (NearForm accounts only)
+## Demo application (NearForm access only)
 There is a live demo application, however it is ONLY accessible to people with a NearForm Google account. You can access it [here](https://fast-speech-to-text-3e44ubrm7q-uc.a.run.app/).
