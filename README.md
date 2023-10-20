@@ -1,18 +1,23 @@
-# Fast speech to text experiments
+# Fast speech to text / Real time multi-lingual voice chat
 
-Repository containing experiments/explorations/proof-of-concept for fast speech to text (and back again) and "real time" chat.
+Repository containing experiment/proof-of-concept for a "real time", multilingual voice chat.
 
-The basic idea being validated here is that streaming speech to text can allow us to create a speech-to-speech bot that responds more naturally, because it transcribes the input as it arrives.
+The basic idea is to utilize Web Speech API and Google Cloud Translate API to enable a voice chat application that can translate speech to multiple languages.
 
 > [!NOTE]
-> The project currently properly runs in Chrome and other Webkit based browsers.
+> The project currently properly runs only in the latest Chrome browser (v117+).
 
-## Running things locally (local development)
+## Running things locally
 
 ### Pre-requisites
 
-The project is using Application Default Credentials for Google Cloud Translation API.
-Before running the server, you will need to authenticate using Coogle Cloud CLI. In order to have server successfully connect to the Firebase RealTime DB, you'll need to impersonate the Service Account that used in GCP.
+If you want to run the server on your own, you will need:
+- set up a Google Cloud project & enable Cloud Translation API
+- set up a Firebase project and enable a Realtime Database
+
+The project is using Application Default Credentials for authentication with Google Cloud Translation API & Firebase.
+
+Before running the server, you will need to authenticate using Coogle Cloud CLI. In order to have server successfully connect to the Firebase Realtime Database, you'll need to impersonate the Service Account that used in GCP.
 
 - To set up user credentials using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev). 
 - To impersonate a service account using Google Cloud CLI, follow [these instructions](https://cloud.google.com/docs/authentication/provide-credentials-adc#sa-impersonation). ***Make sure that your account has the `Service Account Token Creator` permission in GCP.***
@@ -44,3 +49,6 @@ npm run dev
 ```
 
 Open [localhost:5173](http://localhost:5173) in your browser.
+
+## Demo application (NearForm access only)
+There is a live demo application, however it is ONLY accessible to people with a NearForm Google account. You can access it [here](https://fast-speech-to-text-3e44ubrm7q-uc.a.run.app/).
