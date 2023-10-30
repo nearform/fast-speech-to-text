@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fastify/static": "^6.11.2",
+    "@fastify/static": "^6.12.0",
     "@fastify/websocket": "^8.2.0",
     "@google-cloud/speech": "^6.0.2",
     "@google-cloud/translate": "^8.0.2",
