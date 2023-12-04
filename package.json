@@ -29,7 +29,7 @@
   "homepage": "https://github.com/nearform/fast-speech-to-text#readme",
   "devDependencies": {
     "@commitlint/cli": "^18.4.2",
-    "@commitlint/config-conventional": "^17.7.0",
+    "@commitlint/config-conventional": "^18.4.3",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
