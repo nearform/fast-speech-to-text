@@ -33,7 +33,7 @@
     "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.set": "^4.3.9",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.39",
+    "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.15",
     "@types/recoil": "^0.0.9",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
