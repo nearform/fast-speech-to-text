@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@radix-ui/react-switch": "^1.0.3",
-    "axios": "^1.6.3",
+    "axios": "^1.6.7",
     "clsx": "^2.1.0",
     "date-fns": "^3.2.0",
     "firebase": "^10.7.2",
