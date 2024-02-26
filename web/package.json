@@ -34,7 +34,7 @@
     "@types/lodash.set": "^4.3.9",
     "@types/node": "^20.11.10",
     "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.15",
+    "@types/react-dom": "^18.2.19",
     "@types/recoil": "^0.0.9",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.1",
