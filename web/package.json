@@ -16,7 +16,7 @@
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
-    "firebase": "^10.7.2",
+    "firebase": "^10.9.0",
     "lodash.debounce": "^4.0.8",
     "lodash.set": "^4.3.2",
     "rc-slider": "^10.5.0",
