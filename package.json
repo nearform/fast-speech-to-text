@@ -13,7 +13,7 @@
     "dev": "npm run dev --workspace=server & npm run dev --workspace=web",
     "lint": "npm run lint --ws",
     "test": "npm run test --ws",
-    "prepare": "npx husky install",
+    "prepare": "npx husky",
     "build": "npm run build -w web"
   },
   "repository": {
