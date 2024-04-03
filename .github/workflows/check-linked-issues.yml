@@ -14,7 +14,7 @@ jobs:
       issues: read
       pull-requests: write
     steps:
-      - uses: nearform-actions/github-action-check-linked-issues@linked_issues
+      - uses: nearform-actions/github-action-check-linked-issues@loose-matching
         id: check-linked-issues
         with:
           exclude-branches: release/**, dependabot/**
