@@ -9,7 +9,7 @@ The basic idea is to utilize Web Speech API and Google Cloud Translate API to en
 
 ## Running things locally
 
-### Pre-requisites
+### Pre-requisites A
 
 If you want to run the server on your own, you will need:
 - set up a Google Cloud project & enable Cloud Translation API
