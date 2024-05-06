@@ -23,7 +23,7 @@
     "fastify": "^4.26.2",
     "firebase-admin": "^12.1.0",
     "fluent-json-schema": "^4.2.1",
-    "pino": "^8.20.0",
+    "pino": "^9.0.0",
     "pino-pretty": "^11.0.0",
     "uuid": "^9.0.1"
   },
