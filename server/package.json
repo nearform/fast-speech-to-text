@@ -24,7 +24,7 @@
     "firebase-admin": "^12.3.0",
     "fluent-json-schema": "^5.0.0",
     "pino": "^9.2.0",
-    "pino-pretty": "^11.2.1",
+    "pino-pretty": "^11.2.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
