@@ -12,7 +12,7 @@
     "test:dev": "vitest"
   },
   "dependencies": {
-    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-switch": "^1.1.0",
     "axios": "^1.7.4",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
