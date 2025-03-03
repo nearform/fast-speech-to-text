@@ -41,7 +41,7 @@
     "*.{js,jsx}": "eslint --cache --fix"
   },
   "dependencies": {
-    "react-hot-toast": "^2.5.1",
+    "react-hot-toast": "^2.5.2",
     "react-select": "^5.10.0"
   }
 }
