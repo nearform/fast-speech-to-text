@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "nodemon | npx pino-pretty",
     "start": "node server",
-    "test": "NODE_OPTIONS=--loader=testdouble c8 tap --no-cov",
     "lint": "eslint . --ext .js"
   },
   "keywords": [],
